@@ -70,13 +70,13 @@ function GST_SNK.Utils:BreakNextBuildState(buildName)
 end
 
 function GST_SNK.Utils:GetNearestDestructibleBuild(pos, range)
-    local range = range and range or 1500
+    local range = range and range or 150
     local mapName = game.GetMap()
 
     for _, ent in pairs(ents.FindInSphere(pos, range)) do
         if (IsValid(ent) and not ent:IsPlayer()
            and table.HasValue(GST_SNK.Maps[mapName].DestructibleBuild, string.match(ent:GetName(), "^[a-z]*"))) then
-            print(ent:GetName())
+            return ent:GetName()
         end
     end
 end

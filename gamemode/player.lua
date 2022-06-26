@@ -42,9 +42,12 @@ function GM:PlayerDisconnected()
 end
 
 local function GetBuildState(name)
+    if (name == nil or string.len(name) <= 0) then return end
+
     local build_1 = ents.FindByName(name .. "_1")[1]
     local build_2 = ents.FindByName(name .. "_2")[1]
     local build_3 = ents.FindByName(name .. "_3")[1]
+
     return build_3, build_2, build_1
 end
 
@@ -59,7 +62,7 @@ local function tempRepairBuildFunc(name)
     local points = ents.FindByClass("point_template")
     local buildPoints = {}
     for _, point in pairs(points) do
-        if(string.match(point:GetName(), name)) then
+        if (string.match(point:GetName(), name)) then
             table.insert(buildPoints, point)
         end
     end
@@ -85,7 +88,18 @@ hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
 
     if (key == KEY_P and ply:GetCurrentClass().display_name == "Ingénieur") then
         local points = ents.FindByClass("point_template")
-        local state1, state2, state3 = GetBuildState("ferme")
+        local buildPoints = {}
+        local buildName = GST_SNK.Utils:GetNearestDestructibleBuild(ply:GetPos())
+        if (buildName == nil or string.len(buildName) <= 0) then return end
+
+        local state1, state2, state3 = GetBuildState(buildName)
+
+        for _, point in pairs(points) do
+            if (string.match(point:GetName(), buildName)) then
+                table.insert(buildPoints, point)
+            end
+        end
+        table.sort(buildPoints, function(a, b) return a:GetName() > b:GetName() end)
 
         if (state3 == nil) then
             net.Start("ShowRepairBar")
@@ -101,7 +115,7 @@ hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
             end
 
             timer.Create("BuildRepair" .. ply:EntIndex(), 0, 0, function()
-                state1, state2, state3 = GetBuildState("ferme")
+                state1, state2, state3 = GetBuildState(buildName)
                 ply:SetNWFloat("RepairProgression", ply:GetNWFloat("RepairProgression") + 1)
 
                 if (ply:GetVelocity():Length() > 10) then
@@ -110,16 +124,16 @@ hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
 
                 if (ply:GetNWFloat("RepairProgression") == 1000) then
                     if (state3 == nil and state2 ~= nil and state1 ~= nil) then
-                        points[3]:Input("ForceSpawn")
+                        buildPoints[3]:Input("ForceSpawn")
                     end
                     StopRepair(ply)
                 elseif (ply:GetNWFloat("RepairProgression") == 666) then
                     if (state2 == nil and state1 ~= nil) then
-                        points[2]:Input("ForceSpawn")
+                        buildPoints[2]:Input("ForceSpawn")
                     end
                 elseif (ply:GetNWFloat("RepairProgression") == 333) then
                     if (state1 == nil) then
-                        points[1]:Input("ForceSpawn")
+                        buildPoints[1]:Input("ForceSpawn")
                     end
                 end
             end)
