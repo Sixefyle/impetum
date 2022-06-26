@@ -15,11 +15,41 @@ function GM:ShowHelp( ply )
     ply:ConCommand( "team_menu" )
 end
 
-function GM:CalcMainActivity(ply, vel)
-	-- if (ply:GetNWBool("testKick")) then
-	-- 	return -1, ply:LookupSequence("kick")
-	-- end
-	-- return -1, ply:LookupSequence("grab_player")
+function GM:HandlePlayerJumping(ply, velocity)
+	if (string.match(ply:GetModel(), "titan")) then
+		return
+	end
+end
+
+function GM:CalcMainActivity(ply, velocity)
+	ply.CalcIdeal = ACT_MP_STAND_IDLE
+	ply.CalcSeqOverride = -1
+
+	self:HandlePlayerLanding( ply, velocity, ply.m_bWasOnGround )
+
+	if !( self:HandlePlayerNoClipping( ply, velocity ) ||
+		self:HandlePlayerDriving( ply ) ||
+		self:HandlePlayerVaulting( ply, velocity ) ||
+		self:HandlePlayerJumping( ply, velocity ) ||
+		self:HandlePlayerSwimming( ply, velocity ) ||
+		self:HandlePlayerDucking( ply, velocity ) ) then
+
+		local len2d = velocity:Length2DSqr()
+		if ( len2d > 22500) then
+			ply.CalcIdeal = ACT_MP_RUN
+		elseif ( len2d > 0.25 ) then
+			 ply.CalcIdeal = ACT_MP_WALK
+		end
+	end
+
+	ply.m_bWasOnGround = ply:IsOnGround()
+	ply.m_bWasNoclipping = ( ply:GetMoveType() == MOVETYPE_NOCLIP && !ply:InVehicle() )
+
+	if (string.len(ply:GetNWString("doAnimation")) > 0) then
+		ply.CalcSeqOverride = ply:LookupSequence(ply:GetNWString("doAnimation"))
+	end
+
+	return ply.CalcIdeal, ply.CalcSeqOverride
 end
 
 if CLIENT then
