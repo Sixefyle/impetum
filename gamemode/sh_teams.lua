@@ -30,6 +30,12 @@ GST_SNK.Teams = {
         color = Color(140,140,140),
         require_vip = false
     },
+    ["NoTeam"] = {
+        id = 6,
+        name = "Sans équipe",
+        color = Color(218,214,214),
+        require_vip = false
+    },
 }
 
 
@@ -90,14 +96,34 @@ function GST_SNK:InitTeamStats()
     if (not GST_SNK.Teams.Spectator.set_player_info) then
         GST_SNK.Teams.Spectator.set_player_info = function(ply)
             ply:SetHealth(100)
+            ply:SetModelScale(1, 0)
+            ply:SetPlayerColor(Vector(.9, .8, .7))
+            ply:SetHull(Vector(-16, -16, 0), Vector(16, 16, 72))
+            ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
+            ply:SetViewOffset(Vector(0, 0, 64))
+            ply:SetViewOffsetDucked(Vector(0, 0, 32))
+            ply:ResetHull()
             ply:GodEnable()
-            ply:SetModel("models/crow.mdl")
 
             if not ply:Alive() then
                 ply:Spawn()
             end
 
             ply:SetMoveType(MOVETYPE_NOCLIP)
+            ply:SetCollisionGroup(COLLISION_GROUP_WORLD)
+        end
+    end
+
+    if (not GST_SNK.Teams.NoTeam.set_player_info) then
+        GST_SNK.Teams.NoTeam.set_player_info = function(ply)
+            ply:SetHealth(100)
+            ply:PickRandomModel()
+            ply:GodEnable()
+            ply:SetModel("models/crow.mdl")
+
+            if not ply:Alive() then
+                ply:Spawn()
+            end
             ply:SetCollisionGroup(COLLISION_GROUP_WORLD)
         end
     end
@@ -123,7 +149,9 @@ function GST_SNK:SwitchTeam(ply, newTeam, class)
 
     ply:SetTeam(newTeam.id)
 
-    ply:SetClass(class)
+    if (class) then
+        ply:SetClass(class)
+    end
     ply:SetPlayerColor(Vector(newTeam.color.r / 255, newTeam.color.g / 255, newTeam.color.b / 255))
 
     if (not newTeam.set_player_info) then

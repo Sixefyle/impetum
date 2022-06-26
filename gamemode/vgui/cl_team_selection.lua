@@ -150,6 +150,52 @@ function team_menu()
 			draw.SimpleText("VIP Requis", "default_snk", w / 2, (h / 2) + nonVipOffset, Color(235, 0, 0, 100), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
+
+	-- BACK BUTTON
+    local back_button = vgui.Create("DButton", team_menu_frame)
+	back_button:SetSize(180,60)
+	back_button:CenterHorizontal()
+    back_button:SetText("")
+	back_button:SetZPos(1000)
+
+
+    back_button.Paint = function(self, w, h)
+    end
+
+    back_button.DoClick = function()
+        team_menu_frame:Remove()
+    end
+
+    back_button_background = vgui.Create("DImage", back_button)
+    back_button_background:Dock(FILL)
+    back_button_background:DockMargin(0,20,0,13)
+    back_button_background:SetImage(GST_SNK.Images.BUTTON_BACKGROUND_2)
+    back_button_background:SetImageColor(Color(240,52,52))
+
+    back_button_border = vgui.Create("DImage", back_button)
+    back_button_border:SetPos(0,0)
+    back_button_border:Dock(FILL)
+    back_button_border:SetImage(GST_SNK.Images.BUTTON_1)
+
+    back_button_text = vgui.Create("DLabel", back_button_border)
+    back_button_text:Dock(FILL)
+    back_button_text:SetText("")
+
+    back_button_text.Paint = function(self, w, h)
+        draw.SimpleText("Fermer", "default_snk_small", w / 2, h / 2 + 4, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    end
+
+
+
+	-- local back_button = vgui.Create("DButton", team_menu_frame)
+	-- back_button:SetSize(200,40)
+	-- back_button:CenterHorizontal()
+	-- back_button:SetZPos(1000)
+	-- back_button:SetText("Retour")
+
+	-- back_button.DoClick = function()
+	-- 	team_menu_frame:Remove()
+	-- end
 end
 
 concommand.Add("team_menu", team_menu)

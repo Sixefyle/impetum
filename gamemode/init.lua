@@ -43,8 +43,8 @@ function GM:PlayerInitialSpawn(ply)
     timer.Simple(3, function()
         ply.unlocked_classes = ply:GetUnlockedClass()
         ply:SendUnlockedClasses()
-
-        ply:ConCommand("team_menu")
+        GST_SNK:SwitchTeam(ply, GST_SNK.Teams.NoTeam, nil)
+        --ply:ConCommand("team_menu")
     end)
 
     ply.initialSpawn = true
