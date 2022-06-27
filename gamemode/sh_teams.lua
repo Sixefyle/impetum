@@ -4,12 +4,14 @@ GST_SNK.Teams = {
         id = 1,
         name = "Eldien",
         color = Color(95, 202, 109),
+        spawn_name = "spawn_eldien",
         require_vip = false
     },
     ["Mahr"] = {
         id = 2,
         name = "Mahr",
         color = Color(101, 156, 224),
+        spawn_name = "spawn_mahr",
         require_vip = false
     },
     ["Titan"] = {
@@ -42,7 +44,13 @@ GST_SNK.Teams = {
 function GM:CreateTeams()
     for _, currentTeam in pairs(GST_SNK.Teams) do
         team.SetUp(currentTeam.id, currentTeam.name, currentTeam.color)
-        team.SetSpawnPoint(currentTeam.id, "info_player_corps") -- TODO
+    end
+end
+
+function GM:PlayerSelectSpawn(ply, transition)
+    if (ply:GetTeam().spawn_name) then
+        local spawns = ents.FindByName(ply:GetTeam().spawn_name)
+        return spawns[math.random(#spawns)]
     end
 end
 
