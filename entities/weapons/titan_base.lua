@@ -21,7 +21,6 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 SWEP.NextReload = 0
-
 SWEP.TitanModel = "models/gst/titan1.mdl"
 SWEP.BaseHeight = 7
 SWEP.HumanBaseHeight = 1.8
@@ -34,21 +33,17 @@ SWEP.SpeedIncrease = 1.4
 --         LocalPlayer():ManipulateBoneAngles(LocalPlayer():LookupBone("mixamorig:Spine"), Angle(0,0, math.Clamp(angle[1], -80, 100)))
 --     end
 -- end
-
 function SWEP:Initialize()
-
 end
 
 function SWEP:Deploy()
     local owner = self:GetOwner()
-
     local realSize = owner:GetCurrentClass().size and owner:GetCurrentClass().size or self.BaseHeight
     self:SetNWInt("Size", realSize / self.HumanBaseHeight)
-
     self:SetHoldType(self.HoldType)
     owner:SetModel(self.TitanModel)
     owner:SetModelScale(self:GetNWInt("Size"), 1)
-    owner:SetViewOffset(Vector(0,0,64 * self:GetNWInt("Size")))
+    owner:SetViewOffset(Vector(0, 0, 64 * self:GetNWInt("Size")))
     owner:Activate()
 
     if CLIENT then
@@ -56,11 +51,12 @@ function SWEP:Deploy()
         self.PrintName = "Titan " .. self:GetOwner():GetCurrentClass().size and self:GetOwner():GetCurrentClass().size or self.BaseHeight .. " mètres"
     else
         timer.Create("UpdateBonAngle" .. owner:EntIndex(), 0, .1, function()
-            if (IsValid(owner)) then
+            if IsValid(owner) then
                 local angle = owner:EyeAngles()
-                owner:ManipulateBoneAngles(owner:LookupBone("mixamorig:Spine"), Angle(0,0, math.Clamp(angle[1], -80, 100)))
+                owner:ManipulateBoneAngles(owner:LookupBone("mixamorig:Spine"), Angle(0, 0, math.Clamp(angle[1], -80, 60)))
             end
         end)
+
         owner:SetJumpPower(0)
     end
 end
@@ -79,42 +75,51 @@ function SWEP:CanReload()
     return CurTime() > self.NextReload
 end
 
+function SWEP:GrabPlayer(ply)
+    if IsValid(ply) then
+        ply:SetMoveType(MOVETYPE_NONE)
+        GST_SNK.Utils:RunAnimation("grab_player_manger", self:GetOwner(), "GST:Titan_Grab_Manger")
+        local _, eatAnimTime = self:GetOwner():LookupSequence("grab_player_manger")
+        self:SetNextPrimaryFire(CurTime() + eatAnimTime)
+        self:SetNextSecondaryFire(CurTime() + eatAnimTime)
+
+        timer.Create("grabPlayer" .. self:EntIndex(), 0, 0, function()
+            local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2"))
+            handPos = LerpVector(FrameTime() * 0.01, self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2")) + Vector(0,0, -50), handPos )
+            ply:SetPos(handPos)
+        end)
+
+        timer.Simple(eatAnimTime - 1, function()
+            timer.Remove("grabPlayer" .. self:EntIndex())
+            ply:TakeDamage(99999999, self:GetOwner(), self)
+            self:GetOwner():Freeze(false)
+            ply:SetMoveType(MOVETYPE_WALK)
+        end)
+    end
+end
+
 function SWEP:Reload()
-    if (IsFirstTimePredicted() and self:CanReload()) then
+    if IsFirstTimePredicted() and self:CanReload() then
         local _, animTime = self:GetOwner():LookupSequence("grab_player")
+
         if SERVER then
             self:GetOwner():Freeze(true)
-            self:GetOwner():SetNWString("doAnimation", "grab_player")
+            GST_SNK.Utils:RunAnimation("grab_player", self:GetOwner(), "GST:Titan_Grab")
 
-            local grabbedPlayer = nil
             timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
-                local footPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHand"))
+                local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2"))
 
-                local test = ents.Create("prop_physics")
-                test:SetModel("models/props_combine/breenglobe.mdl")
-                test:Spawn()
-                test:SetPos(footPos)
-                test:Fire("kill", nil, .1)
-
-                if (timer.Exists("checkNearbyPlayer" .. self:EntIndex()) and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) <= animTime * 10 and
-                timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) >= animTime * 7) then
-                    for _, ply in pairs(ents.FindInSphere(footPos, 120)) do
-                        if (IsValid(ply) and ply:IsPlayer() and ply:Alive() and ply ~= self:GetOwner()) then
-                            grabbedPlayer = ply
-                        end
+                -- Check nearby player from the hand and grab them
+                for _, ply in pairs(ents.FindInSphere(handPos, 80)) do
+                    if IsValid(ply) and ply:IsPlayer() and ply:Alive() and ply ~= self:GetOwner() then
+                        self:GrabPlayer(ply)
+                        timer.Remove("checkNearbyPlayer" .. self:EntIndex())
                     end
                 end
 
-                if (timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1) then
-                    if (IsValid(grabbedPlayer)) then
-                        self:GetOwner():SetNWString("doAnimation", "grab_player")
-                        local _, eatAnimTime = self:GetOwner():LookupSequence("grab_player")
-                        timer.Simple(eatAnimTime, function()
-                            grabbedPlayer:TakeDamage(grabbedPlayer:Health(), self:GetOwner(), self)
-                        end)
-                    else
+                if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
+                    if not IsValid(grabbedPlayer) then
                         self:GetOwner():Freeze(false)
-                        self:GetOwner():SetNWString("doAnimation", "")
                     end
                 end
             end)
@@ -127,29 +132,31 @@ function SWEP:Reload()
 end
 
 function SWEP:SecondaryAttack()
-    if (IsFirstTimePredicted() and self:CanSecondaryAttack()) then
+    if IsFirstTimePredicted() and self:CanSecondaryAttack() then
         local _, animTime = self:GetOwner():LookupSequence("kick")
+
         if SERVER then
             self:GetOwner():Freeze(true)
             self:GetOwner():SetNWString("doAnimation", "kick")
-
             local damagedPlayers = {}
             local buildDestroyed = false
+
             timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
-                local footPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightFoot"))                
-                if (timer.Exists("checkNearbyPlayer" .. self:EntIndex()) and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) <= animTime * 10 and
-                timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) >= animTime * 7) then
+                local footPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightFoot"))
+
+                if timer.Exists("checkNearbyPlayer" .. self:EntIndex()) and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) <= animTime * 10 and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) >= animTime * 7 then
                     for _, ply in pairs(ents.FindInSphere(footPos, 120)) do
-                        if (IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner()) then
+                        if IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() then
                             ply:TakeDamage(10000, self:GetOwner(), self)
                             table.insert(damagedPlayers, ply)
-                        elseif (not buildDestroyed) then
+                        elseif not buildDestroyed then
                             local tr = util.TraceLine({
                                 start = self:GetOwner():EyePos(),
                                 endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 280,
-                                filter = function(ent) return ent ~= self:GetOwner()  end
+                                filter = function(ent) return ent ~= self:GetOwner() end
                             })
-                            if (IsValid(tr.Entity)) then
+
+                            if IsValid(tr.Entity) then
                                 GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
                                 buildDestroyed = true
                             end
@@ -157,7 +164,7 @@ function SWEP:SecondaryAttack()
                     end
                 end
 
-                if (timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1) then
+                if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
                     self:GetOwner():Freeze(false)
                     self:GetOwner():SetNWString("doAnimation", "")
                 end
@@ -165,41 +172,42 @@ function SWEP:SecondaryAttack()
         else
             self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
         end
+
         self:GetOwner():AnimRestartMainSequence()
         self:SetNextSecondaryFire(CurTime() + animTime)
     end
 end
 
 function SWEP:PrimaryAttack()
-    if (IsFirstTimePredicted() and self:CanPrimaryAttack()) then
-        local _, animTime = self:GetOwner():LookupSequence("balayage")
-        local animationName = "GST:Titan_Balayage"
-        if (self:GetOwner():EyeAngles()[1] >= 10) then
-            animationName = "GST:Titan_Punch1"
-            _, animTime = self:GetOwner():LookupSequence("punch1")
+    if IsFirstTimePredicted() and self:CanPrimaryAttack() then
+        local animationName = "balayage"
+        if self:GetOwner():EyeAngles()[1] >= 10 then
+            animationName = "punch1"
         end
+        _, animTime = self:GetOwner():LookupSequence(animationName)
+
         if SERVER then
             self:GetOwner():Freeze(true)
-            net.Start(animationName)
-                net.WriteEntity(self:GetOwner())
-            net.Broadcast()
-
+            self:GetOwner():SetNWString("doAnimation", animationName)
             local damagedPlayers = {}
             local buildDestroyed = false
+
             timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
-                if (timer.Exists("checkNearbyPlayer" .. self:EntIndex()) and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) <= animTime * 5) then
+                if timer.Exists("checkNearbyPlayer" .. self:EntIndex()) and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) <= animTime * 5 then
                     local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightHandPinky1"))
+
                     for _, ply in pairs(ents.FindInSphere(handPos, 80)) do
-                        if (IsValid(ply) and ply:IsPlayer() and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() and ply:Alive()) then
+                        if IsValid(ply) and ply:IsPlayer() and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() and ply:Alive() then
                             ply:TakeDamage(100, self:GetOwner(), self)
                             table.insert(damagedPlayers, ply)
-                        elseif (not buildDestroyed) then
+                        elseif not buildDestroyed then
                             local tr = util.TraceLine({
                                 start = self:GetOwner():EyePos(),
                                 endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 250,
-                                filter = function(ent) return ent ~= self:GetOwner()  end
+                                filter = function(ent) return ent ~= self:GetOwner() end
                             })
-                            if (IsValid(tr.Entity)) then
+
+                            if IsValid(tr.Entity) then
                                 GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
                                 buildDestroyed = true
                             end
@@ -207,13 +215,15 @@ function SWEP:PrimaryAttack()
                     end
                 end
 
-                if (timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1) then
+                if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
                     self:GetOwner():Freeze(false)
+                    self:GetOwner():SetNWString("doAnimation", "")
                 end
             end)
         else
             self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
         end
+
         self:SetNextPrimaryFire(CurTime() + animTime)
     end
 end

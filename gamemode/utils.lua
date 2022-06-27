@@ -80,3 +80,18 @@ function GST_SNK.Utils:GetNearestDestructibleBuild(pos, range)
         end
     end
 end
+
+function GST_SNK.Utils:RunAnimation(animationName, ply, netName)
+    ply:SetNWString("doAnimation", animationName)
+    local _, animTime = ply:LookupSequence(animationName)
+
+    net.Start(netName)
+        net.WriteEntity(ply)
+    net.Broadcast()
+
+    timer.Simple(animTime, function()
+        if(ply:GetNWString("doAnimation") == animationName) then
+            ply:SetNWString("doAnimation", "")
+        end
+    end)
+end
