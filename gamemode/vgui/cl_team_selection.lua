@@ -170,7 +170,7 @@ function team_menu()
     back_button_background:Dock(FILL)
     back_button_background:DockMargin(0,20,0,13)
     back_button_background:SetImage(GST_SNK.Images.BUTTON_BACKGROUND_2)
-    back_button_background:SetImageColor(Color(240,52,52))
+    back_button_background:SetImageColor(Color(134,9,9))
 
     back_button_border = vgui.Create("DImage", back_button)
     back_button_border:SetPos(0,0)

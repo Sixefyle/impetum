@@ -1,8 +1,9 @@
 local ply = FindMetaTable("Player")
 
 local function DoDrop(receiver, tableOfDroppedPanels, isDropped, menuIndex, mouseX, mouseY)
-    if isDropped then
-        tableOfDroppedPanels[1]:SetPos(mouseX, mouseY)
+	LocalPlayer().player_hud:SetPos(mouseX, mouseY)
+	if isDropped then
+        LocalPlayer().player_hud:SetPos(mouseX, mouseY)
 		SavePlayerHudPos(mouseX, mouseY)
     end
 end
@@ -52,7 +53,13 @@ function ply:RefreshHud()
 	end
 
 	self.player_hud:SetBackgroundColor(Color(0, 0, 0, 0))
-    self.player_hud:Droppable("playerHudDrag")
+    --self.player_hud:Droppable("playerHudDrag")
+
+	player_hud_move_panel = vgui.Create("DPanel", self.player_hud)
+	player_hud_move_panel:Dock(FILL)
+	player_hud_move_panel:SetBackgroundColor(Color(255,0,0,0))
+	player_hud_move_panel:SetZPos(10)
+	player_hud_move_panel:Droppable("playerHudDrag")
 
     player_hud_name = vgui.Create("DLabel", self.player_hud)
     player_hud_name:SetPos(95, 0)
@@ -116,7 +123,7 @@ function ply:RefreshHud()
 	-- COOLDOWN --
 	cooldown_panel = vgui.Create("DPanel", self.base)
 	cooldown_panel:SetPos(0,0)
-	cooldown_panel:SetSize(400,147)
+	cooldown_panel:SetSize(450,147)
 	cooldown_panel:SetBackgroundColor(Color(0,0,0, 0))
 
 	for i, weap in ipairs(LocalPlayer():GetSkills()) do
@@ -195,6 +202,8 @@ end
 
 
 function ply:ShowWeaponCooldownBar(shouldShow)
+	if (not IsValid(self) or not self.weap_cooldown_bar) then return end
+
 	if (shouldShow) then
 		self.weap_cooldown_bar:Show()
 	else

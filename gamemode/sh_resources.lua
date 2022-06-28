@@ -7,6 +7,7 @@ GST_SNK.Images = {
 	["BUTTON_2"] = base_image_path .. "button/button2.png",
 	["BUTTON_BACKGROUND_1"] = base_image_path .. "button/button_background.png",
 	["BUTTON_BACKGROUND_2"] = base_image_path .. "button/button_background2.png",
+	["RED_CROSS"] = base_image_path .. "hud/cross.png",
 
 	["TAB_MENU_HEADER"] = base_image_path .. "scoreboard/header.png",
 	["TAB_MENU_BACKGROUND_END"] = base_image_path .. "scoreboard/background_end.png",

@@ -20,14 +20,23 @@ function ply:ShowBuildSelector()
     header_pane:SetBackgroundColor(Color(0,0,0,0))
 
     local close_button = vgui.Create("DButton", header_pane)
-    close_button:SetText("Fermer")
-    close_button:SetPos(0,0)
-    close_button:SetSize(100, 10)
+    close_button:SetText("")
+    close_button:Dock(RIGHT)
+    close_button:DockMargin(0, 10, 10, 55)
+    close_button:SetWide(40)
     close_button:SetMouseInputEnabled(true)
+
+    function close_button:Paint()
+
+    end
 
     close_button.DoClick = function()
         self.build_base_panel:Remove()
     end
+
+    close_button_image = vgui.Create("DImage", close_button)
+    close_button_image:Dock(FILL)
+    close_button_image:SetImage(GST_SNK.Images.RED_CROSS)
 
     local available_build_pane = vgui.Create("DScrollPanel", self.build_base_panel)
     available_build_pane:Dock(FILL)
