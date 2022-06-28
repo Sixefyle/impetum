@@ -3,6 +3,7 @@ GM.Name = "Impetum"
 GM.Author = "Sixefyle"
 GM.Email = "N/A"
 GM.Website = "https://discord.gg/peaCt8KYDG"
+GM.TeamBased = true
 DeriveGamemode( "sandbox" )
 ------------------------------------------------------------------
 function GM:Initialize()
@@ -45,8 +46,10 @@ function GM:CalcMainActivity(ply, velocity)
 	ply.m_bWasOnGround = ply:IsOnGround()
 	ply.m_bWasNoclipping = ( ply:GetMoveType() == MOVETYPE_NOCLIP && !ply:InVehicle() )
 
-	if (string.len(ply:GetNWString("doAnimation")) > 0) then
-		ply.CalcSeqOverride = ply:LookupSequence(ply:GetNWString("doAnimation"))
+	if SERVER  then
+		if (string.len(ply:GetNWString("doAnimation")) > 0) then
+			ply.CalcSeqOverride = ply:LookupSequence(ply:GetNWString("doAnimation"))
+		end	
 	end
 
 	return ply.CalcIdeal, ply.CalcSeqOverride

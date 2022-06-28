@@ -48,10 +48,11 @@ function GM:CreateTeams()
 end
 
 function GM:PlayerSelectSpawn(ply, transition)
-    if (ply:GetTeam().spawn_name) then
-        local spawns = ents.FindByName(ply:GetTeam().spawn_name)
-        return spawns[math.random(#spawns)]
+    local spawns = ents.FindByClass("info_player_start")
+    if (ply:GetTeam() and ply:GetTeam().spawn_name) then
+        spawns = ents.FindByName(ply:GetTeam().spawn_name)
     end
+    return spawns[math.random(#spawns)]
 end
 
 function GST_SNK:InitTeamStats()
@@ -125,7 +126,6 @@ function GST_SNK:InitTeamStats()
     if (not GST_SNK.Teams.NoTeam.set_player_info) then
         GST_SNK.Teams.NoTeam.set_player_info = function(ply)
             ply:SetHealth(100)
-            ply:PickRandomModel()
             ply:GodEnable()
             ply:SetModel("models/crow.mdl")
 

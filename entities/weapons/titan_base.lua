@@ -188,7 +188,7 @@ function SWEP:PrimaryAttack()
 
         if SERVER then
             self:GetOwner():Freeze(true)
-            self:GetOwner():SetNWString("doAnimation", animationName)
+            GST_SNK.Utils:RunAnimation("punch1", self:GetOwner(), "GST:Titan_Punch1")
             local damagedPlayers = {}
             local buildDestroyed = false
 
@@ -217,7 +217,6 @@ function SWEP:PrimaryAttack()
 
                 if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
                     self:GetOwner():Freeze(false)
-                    self:GetOwner():SetNWString("doAnimation", "")
                 end
             end)
         else
