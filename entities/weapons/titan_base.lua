@@ -33,6 +33,13 @@ SWEP.SpeedIncrease = 1.4
 --         LocalPlayer():ManipulateBoneAngles(LocalPlayer():LookupBone("mixamorig:Spine"), Angle(0,0, math.Clamp(angle[1], -80, 100)))
 --     end
 -- end
+hook.Add( "PlayerFootstep", "TitanFootStep", function( ply, pos, foot, sound, volume, rf )
+	if (ply:GetTeam().name == "Titan") then
+        ply:EmitSound( "gst/titan_footstep.wav" ) -- Play the footsteps hunter is using
+        return true -- Don't allow default footsteps, or other addon footsteps
+    end
+end )
+
 function SWEP:Initialize()
 end
 
