@@ -71,7 +71,7 @@ if SERVER then
                 ply.PlacedCanon:Remove()
             end
             local canon = ents.Create("ent_canon1")
-            canon:SetOwner(ply)
+            canon:SetCreator(ply)
             canon:SetAngles(angle)
             canon:Spawn()
             canon:SetPos(pos)
@@ -80,7 +80,6 @@ if SERVER then
     end)
 
     function SWEP:UseSkill()
-        self:GetOwner():SetHealth(self:GetOwner():GetMaxHealth())
     end
 end
 
