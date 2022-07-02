@@ -34,10 +34,13 @@ SWEP.ViewModelFOV = 60
 SWEP.MaxSpeed = 2000
 SWEP.BaseAttractSpeed = 30
 SWEP.BaseMaxGas = 1000
-SWEP.BaseRange = 600
 
-SWEP.GrabComsuption = 10
-SWEP.GasComsuption = 20
+-- Grab settings
+SWEP.BaseRange = 1200
+SWEP.Angle = 60
+
+SWEP.GrabComsuption = 0 --10
+SWEP.GasComsuption = 0 --20
 
 SWEP.RegenMaxPerc = 20
 SWEP.RegenSpeedPerc = 1
@@ -65,11 +68,11 @@ if SERVER then
         self:SetNWFloat("Gas", self:GetNWInt("MaxGas"))
         self.MaxGasRegen = self:GetNWInt("MaxGas") * (self.RegenMaxPerc / 100)
         self:InitGasHandler()
-        --PrintTable(self:GetOwner():GetSequenceList())
     end
 
     function SWEP:Holster()
         self:RemoveRopes()
+        return true
     end
 
     function SWEP:PrimaryAttack()
@@ -140,37 +143,67 @@ if SERVER then
         self.Owner:LagCompensation(false)
     end
 
-    hook.Add("PlayerButtonDown", "3DMG:OnButtonDown", function(ply, button)
-        local swep = ply:GetActiveWeapon()
-        if IsValid(swep) and swep:GetClass() ~= "gst_3dmg" then return end
+    function SWEP:DoGrab(ply)
+        local targetEntity = ply:GetEyeTraceNoCursor().Entity
+        if (not IsValid(targetEntity)) then return end
 
-        if button == KEY_E and swep:GetGas() > 0 then
-            local targetEntity = ply:GetEyeTraceNoCursor().Entity
-            if(not IsValid(targetEntity)) then return end
+        self.hasGrabTitan = string.match(targetEntity:GetModel(), "titan") and ply:GetPos():Distance(targetEntity:EyePos()) < 2000 -- faire ca mais avec une verification sur le début du nom du model (ex. titan_...)
 
-            swep.hasGrabTitan = baseclass.Get(targetEntity:GetClass()).Base == "npc_iv04_base" and ply:GetPos():Distance(targetEntity:EyePos()) < 2000 -- faire ca mais avec une verification sur le début du nom du model (ex. titan_...)
+        if IsValid(swep) and self.hasGrabTitan then
+            self:RemoveRopes()
+            self:ThrowGrappinToPos(targetEntity:GetPos(), targetEntity:GetPos() + Vector(0,0,450))
+        else
+            self:RemoveRopes()
+            local nearestEnts = self:GetNearestEnts(ply)
+            self:ThrowGrappin(nearestEnts[1] and nearestEnts[1].ent or nil, nearestEnts[2] and nearestEnts[2].ent or nil)
+        end
+    end
 
-            if IsValid(swep) and swep.hasGrabTitan then
-                swep:ThrowGrappinToPos(targetEntity:GetPos(), targetEntity:GetPos() + Vector(0,0,450))
-            else
-                local nearestEnts = GetNearestEnts(ply, swep:GetNWInt("Range"))
-                swep:ThrowGrappin(nearestEnts[1] and nearestEnts[1].ent or nil, nearestEnts[2] and nearestEnts[2].ent or nil)
-            end
-
-            swep:SetNWBool("use_grab", true)
+    function SWEP:GetRopesDistance()
+        local ply = self:GetOwner()
+        local firstRopeDistance = -1
+        local secondRopeDistance = -1
+        if IsValid(self.rope1) then
+            firstRopeDistance = self.rope1:GetDestination():Distance(ply:GetPos()) 
         end
 
-        if button == KEY_SPACE and swep:GetGas() > 0 and swep:CanUseGas() then
+        if IsValid(self.rope1) then
+            secondRopeDistance = self.rope1:GetDestination():Distance(ply:GetPos())
+        end
+        return firstRopeDistance, secondRopeDistance
+    end
+
+    hook.Add("PlayerButtonDown", "3DMG:OnButtonDown", function(ply, button)
+        local swep = ply:GetActiveWeapon()
+
+        if not IsValid(swep) or (IsValid(swep) and swep:GetClass() ~= "gst_3dmg") then return end
+
+        if button == KEY_E and swep:GetGas() > 0 then
+            swep:SetNWBool("use_grab", true)
+            swep:DoGrab(ply)
+            timer.Create("autoGrab" .. ply:EntIndex(), .1, 0, function()
+                if (swep:GetGas() > 0 and swep:GetNWBool("use_grab")) then
+                    local firstRopeDistance, secondRopeDistance = swep:GetRopesDistance()
+                    local longest = firstRopeDistance > secondRopeDistance and firstRopeDistance or secondRopeDistance
+
+                    if longest > 3500 or longest == -1 then
+                        swep:DoGrab(ply)
+                    end
+                end
+            end)
+        end
+
+        if button == KEY_SPACE and  swep:GetGas() > 0 and swep:CanUseGas() then
             swep:SetNWBool("use_gas", true)
         end
     end)
 
-    function GetNearestEnts(ply, range)
+    function SWEP:GetNearestEnts(ply)
         local nearest = {}
         local currentEnt = {}
         local index = 1
 
-        for _, ent in pairs(ents.FindInCone(ply:EyePos(), ply:GetAimVector(), range, math.cos(math.rad(90)))) do
+        for _, ent in pairs(ents.FindInCone(ply:EyePos() + Vector(0,0,350), ply:GetAimVector(), self.BaseRange, math.cos(math.rad(self.Angle)))) do
             if ent:GetName() == "accroche" then
                 local distance = ply:GetPos():Distance(ent:GetPos())
                 currentEnt["distance"] = distance
@@ -198,7 +231,7 @@ if SERVER then
             self.rope1:SetDestination(loc1)
             self.rope1:SetParent(self)
             self.rope1:SetOwner(self:GetOwner())
-            self.rope1:SetPos(self:GetOwner():GetPos())
+            self.rope1:SetPos(self:GetOwner():LocalToWorld(Vector(0,-10,20)))
             self.rope1:Spawn()
             self:SetNWEntity("rope1", self.rope1)
         end
@@ -209,7 +242,7 @@ if SERVER then
             self.rope2:SetDestination(loc2)
             self.rope2:SetParent(self)
             self.rope2:SetOwner(self:GetOwner())
-            self.rope2:SetPos(self:GetOwner():GetPos())
+            self.rope2:SetPos(self:GetOwner():LocalToWorld(Vector(0,10,20)))
             self.rope2:Spawn()
             self:SetNWEntity("rope2", self.rope2)
         end
@@ -222,6 +255,7 @@ if SERVER then
         if button == KEY_E then
             swep:RemoveRopes()
             swep:SetNWBool("use_grab", false)
+            timer.Remove("autoGrab" .. ply:EntIndex())
         end
 
         if button == KEY_SPACE then
@@ -273,7 +307,7 @@ if SERVER then
 
     function SWEP:Think()
         local ply = self:GetOwner()
-    
+
         if IsValid(self.rope1) or IsValid(self.rope2) then
             if IsValid(self.rope1) and self.rope1:GetDestination():Distance(ply:GetPos()) > 4000 then
                 self.rope1:Remove()
@@ -371,3 +405,28 @@ end
 function SWEP:GetGas()
     return self:GetNWFloat("Gas", 0)
 end
+
+-- local mat = Material( "models/shiny" )
+-- mat:SetFloat( "$alpha", 0.5 )
+
+-- hook.Add( "PostDrawOpaqueRenderables", "conetest", function()
+-- 	local size = 600
+-- 	local dir = LocalPlayer():GetAimVector()
+-- 	local startPos = LocalPlayer():EyePos() + Vector(0,0,350)
+--     local angle = 60
+
+-- 	local entities = ents.FindInCone(LocalPlayer():EyePos() + Vector(0,0,350), LocalPlayer():GetAimVector(), size, math.cos(math.rad(angle)))
+
+--     -- draw the outer box
+-- 	local mins = Vector( -size, -size, -size )
+-- 	local maxs = Vector( size, size, size )
+
+-- 	render.SetMaterial( mat )
+-- 	render.DrawWireframeBox( startPos, Angle( 0, 0, 0 ), mins, maxs, color_white, true )
+-- 	--render.DrawBox( startPos, Angle( 0, 0, 0 ), -mins, -maxs, Color(44,44,44,100) )
+
+-- 	-- draw the lines
+-- 	for id, ent in ipairs( entities ) do
+-- 		render.DrawLine( LocalPlayer():GetPos(), ent:WorldSpaceCenter(), Color( 255, 0, 0 ) )
+-- 	end
+-- end )
