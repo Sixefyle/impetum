@@ -31,7 +31,7 @@ function OpenClassMenu(newTeam)
 
     panel_title = vgui.Create("DPanel", base_panel)
     panel_title:Dock(TOP)
-    panel_title:SetHeight(160)
+    panel_title:SetHeight(180)
     panel_title:SetBackgroundColor(Color(0,0,0,0))
 
     -- BACK BUTTON
@@ -42,6 +42,8 @@ function OpenClassMenu(newTeam)
     back_button:SetText("")
 
     back_button.Paint = function(self, w, h)
+        GST_SNK.Utils:HUDPlaySound(self, "button/hover.wav")
+
     end
 
     back_button.DoClick = function()
@@ -259,8 +261,10 @@ function OpenClassMenu(newTeam)
         class_button:SetZPos(1)
 
         class_button.Paint = function(self, w, h)
+            GST_SNK.Utils:HUDPlaySound(self, "button/hover.wav")
+
             if (isLocked ) then
-                if(self:IsHovered())then
+                if (self:IsHovered())then
                     surface.SetDrawColor(Color(233,200,37))
                 else
                     surface.SetDrawColor(Color(199,172,38))
@@ -375,14 +379,14 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     title:SetText("")
 
     title.Paint = function(self, w, h)
-        draw.SimpleText("Acheter " .. class.display_name .. " ?", "default_snk_normal", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText("Acheter " .. class.display_name .. " ?", "default_snk_normal", w / 2, h / 2 + 15, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
     local description = vgui.Create("DLabel", base_modal_panel)
     description:Dock(TOP)
     description:DockMargin(50,0,50,0)
     description:SetHeight(180)
-    description:SetFont("gotham_19")
+    description:SetFont("gotham_24")
     description:SetText(class.description and class.description or "Aucune déscription fournie.")
     description:SetWrap(true)
 
@@ -395,7 +399,15 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     std_buy_button:SetText("")
 
     std_buy_button.Paint = function(self, w, h)
+        GST_SNK.Utils:HUDPlaySound(self, "button/hover.wav")
+
+        if (std_buy_button:IsHovered()) then
+            std_buy_button_background:SetImageColor(Color(70,70,70))
+        else
+            std_buy_button_background:SetImageColor(Color(90,90,90))
+        end
     end
+    
 
     std_buy_button.DoClick = function()
         net.Start("ClassBuyRequest")
@@ -426,8 +438,8 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     std_buy_button_text:SetText("")
 
     std_buy_button_text.Paint = function(self, w, h)
-        draw.SimpleText("Acheter", "default_snk_very_small", w / 2, h / 2 + 14, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        draw.SimpleText(string.Comma(class.price_std) .. " Coins", "default_snk_15", w / 2, h / 2 - 3, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)   
+        --draw.SimpleText("Acheter", "default_snk_very_small", w / 2, h / 2 + 14, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText(string.Comma(class.price_std) .. " Coins", "default_snk_very_small", w / 2, h / 2 + 7, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)   
      end
 
     -- BUY GST
@@ -438,10 +450,12 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     gst_buy_button:SetText("")
 
     gst_buy_button.Paint = function(self, w, h)
+        GST_SNK.Utils:HUDPlaySound(self, "button/hover.wav")
+
         if (gst_buy_button:IsHovered()) then
-            gst_buy_button_background:SetImageColor(Color(255,255,0))
+            gst_buy_button_background:SetImageColor(Color(226,170,14))
         else
-            gst_buy_button_background:SetImageColor(Color(204,204,69))
+            gst_buy_button_background:SetImageColor(Color(255,187,0))
         end
     end
 
@@ -474,8 +488,8 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     gst_buy_button_text:SetText("")
 
     gst_buy_button_text.Paint = function(self, w, h)
-        draw.SimpleText("Acheter", "default_snk_very_small", w / 2, h / 2 + 14, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        draw.SimpleText(string.Comma(class.price_gst) .. " GST Coins", "default_snk_15", w / 2, h / 2 - 3, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)       
+        --draw.SimpleText("Acheter", "default_snk_very_small", w / 2, h / 2 + 14, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        draw.SimpleText(string.Comma(class.price_gst) .. " GST Coins", "default_snk_very_small", w / 2, h / 2 + 7, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)       
     end
 
     -- CANCEL BUTTON
@@ -487,6 +501,13 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     cancel_button:SetText("")
 
     cancel_button.Paint = function(self, w, h)
+        GST_SNK.Utils:HUDPlaySound(self, "button/hover.wav")
+
+        if (cancel_button:IsHovered()) then
+            cancel_button_background:SetImageColor(Color(105,10,10))
+        else
+            cancel_button_background:SetImageColor(Color(134,9,9))
+        end
     end
 
     cancel_button.DoClick = function()
@@ -497,7 +518,6 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     cancel_button_background:Dock(FILL)
     cancel_button_background:DockMargin(0,26,0,16)
     cancel_button_background:SetImage(GST_SNK.Images.BUTTON_BACKGROUND_2)
-    cancel_button_background:SetImageColor(Color(255,0,0))
 
     cancel_button_border = vgui.Create("DImage", cancel_button)
     cancel_button_border:SetPos(0,0)

@@ -18,7 +18,7 @@ GST_SNK.Teams = {
         id = 3,
         name = "Titan",
         color = Color(175, 51, 51),
-        require_vip = true
+        require_vip = false
     },
     ["Primordial"] = {
         id = 4,
@@ -141,9 +141,8 @@ function GST_SNK:RequestTeamSwitch(ply, newTeam, class)
     if (not ply:Alive() or ply.initialSpawn) then
         if (ply.initialSpawn) then
             ply.initialSpawn = false
-            ply:Kill()
+            ply:KillSilent()
         end
-
         GST_SNK:SwitchTeam(ply, newTeam, class)
     else
         ply:ChatPrint("Changement d'équipe lors de votre prochaine réapparition (" .. newTeam.name .. " - " .. class.display_name .. ")")
@@ -155,7 +154,10 @@ end
 function GST_SNK:SwitchTeam(ply, newTeam, class)
     ply:ChatPrint("Nouvelle équipe (" .. newTeam.name .. ")")
 
-    ply:SetTeam(newTeam.id)
+    if (ply:GetTeam() ~= newTeam) then
+        ply:SetTeam(newTeam.id)
+        ply:SetNWInt("Points", 0)
+    end
 
     if (class) then
         ply:SetClass(class)

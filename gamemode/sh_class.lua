@@ -57,14 +57,14 @@ GST_SNK.Classes = {
         ["Artilleur"] = {
             ["id"] = 5,
             ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_ARTILLERY,
-            ["description"] = "Je suis une description",
+            ["description"] = "Munissez vous d'un canon afin de vous protéger des titans",
             ["display_name"] = "Artilleur",
             ["health"] = 100,
             ["speed"] = 350,
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg", "skill_cannon"},
-            ["price_std"] = 1000,
-            ["price_gst"] = 120
+            ["price_std"] = 0,
+            ["price_gst"] = 0
         },
         ["Veteran"] = {
             ["id"] = 6,
@@ -126,7 +126,7 @@ GST_SNK.Classes = {
     [GST_SNK.Teams.Mahr.name] = {
         ["Soldat"] = {
             ["id"] = 1,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_SOLDIER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_SOLDIER,
             ["description"] = "Je suis une description",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -138,7 +138,7 @@ GST_SNK.Classes = {
         },
         ["Docteur"] = {
             ["id"] = 2,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_HEALER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_HEALER,
             ["description"] = "Je suis une belle plus grande description",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -150,7 +150,7 @@ GST_SNK.Classes = {
         },
         ["Ravitalleur"] = {
             ["id"] = 3,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_SUPPLIER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_SUPPLIER,
             ["display_name"] = "Soldat",
             ["description"] = "Je suis une",
             ["health"] = 100,
@@ -162,7 +162,7 @@ GST_SNK.Classes = {
         },
         ["Fusillier"] = {
             ["id"] = 4,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_GUNNER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_GUNNER,
             ["description"] = "Je suis une très très très trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèsdescription",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -174,7 +174,7 @@ GST_SNK.Classes = {
         },
         ["Artilleur"] = {
             ["id"] = 5,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_ARTILLERY,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_ARTILLERY,
             ["description"] = "Je suis une description",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -186,7 +186,7 @@ GST_SNK.Classes = {
         },
         ["Veteran"] = {
             ["id"] = 6,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_VETERAN,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_VETERAN,
             ["description"] = "Je suis une très très très trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèstrès trèsdescription",
             ["display_name"] = "Vétéran",
             ["health"] = 100,
@@ -198,7 +198,7 @@ GST_SNK.Classes = {
         },
         ["Eclaireur"] = {
             ["id"] = 7,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_SCOUT,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_SCOUT,
             ["description"] = "c'est fous n'est-ce pas ?!",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -210,7 +210,7 @@ GST_SNK.Classes = {
         },
         ["BAP"] = {
             ["id"] = 8,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_BAP,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_BAP,
             ["description"] = "BEEP BOOP BAP",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -222,7 +222,7 @@ GST_SNK.Classes = {
         },
         ["Demolisseur"] = {
             ["id"] = 9,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_DEMOLISHER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_DEMOLISHER,
             ["description"] = "Il démolie, c'est dans le nom trou duc",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -234,7 +234,7 @@ GST_SNK.Classes = {
         },
         ["Ingenieur"] = {
             ["id"] = 10,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_ENGINEER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_ENGINEER,
             ["description"] = "Je suis une description",
             ["display_name"] = "Ingénieur",
             ["health"] = 100,
@@ -246,7 +246,7 @@ GST_SNK.Classes = {
         },
         ["Trappeur"] = {
             ["id"] = 11,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_TRAPPER,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_TRAPPER,
             ["description"] = "Je suis une description",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -258,7 +258,7 @@ GST_SNK.Classes = {
         },
         ["Medecin"] = {
             ["id"] = 12,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_MEDIC,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_MEDIC,
             ["description"] = "Je suis une description",
             ["display_name"] = "Soldat",
             ["health"] = 100,
@@ -270,7 +270,7 @@ GST_SNK.Classes = {
         },
         ["Tank"] = {
             ["id"] = 13,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ELDIEN_TANK,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_MAHR_TANK,
             ["description"] = "Je suis une description",
             ["display_name"] = "Tank",
             ["health"] = 200,
@@ -295,9 +295,21 @@ GST_SNK.Classes = {
         },
     },
     [GST_SNK.Teams.Titan.name] = {
-        ["Titan7"] = {
+        ["Titan5"] = {
             ["id"] = 1,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ATTACK,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_TITAN_5M,
+            ["display_name"] = "Titan 5 mètres",
+            ["health"] = 1000,
+            ["speed"] = 350,
+            ["max_speed"] = 350,
+            ["size"] = 5,
+            ["kit"] = {"titan_base"},
+            ["price_std"] = 0,
+            ["price_gst"] = 0
+        },
+        ["Titan7"] = {
+            ["id"] = 2,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_TITAN_7M,
             ["display_name"] = "Titan 7 mètres",
             ["health"] = 1000,
             ["speed"] = 400,
@@ -307,8 +319,8 @@ GST_SNK.Classes = {
             ["price_gst"] = 750
         },
         ["Titan10"] = {
-            ["id"] = 2,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ATTACK,
+            ["id"] = 3,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_TITAN_10M,
             ["display_name"] = "Titan 10 mètres",
             ["health"] = 1000,
             ["speed"] = 500,
@@ -319,8 +331,8 @@ GST_SNK.Classes = {
             ["price_gst"] = 750
         },
         ["Titan15"] = {
-            ["id"] = 3,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ATTACK,
+            ["id"] = 4,
+            ["icon"] = GST_SNK.Images.CLASS_ICON_TITAN_15M,
             ["display_name"] = "Titan 15 mètres",
             ["health"] = 1000,
             ["speed"] = 750,
@@ -440,7 +452,7 @@ function ply:GetUnlockedClass()
                 "Fusillier"
             },
             ["Titan"] = {
-                "Basic"
+                "Titan5"
             },
             ["Primordial"] = {}
         }
@@ -494,21 +506,23 @@ if (SERVER) then -- TODO mettre ca dans un fichier server
         local payment_method = net.ReadBit()
         local class_name = net.ReadString()
         local team_name = net.ReadString()
-        
+ 
         local price = (payment_method == 1 and GST_SNK.Classes[team_name][class_name].price_gst or GST_SNK.Classes[team_name][class_name].price_std)
-
-        if (not table.HasValue(ply.unlocked_classes[team_name], class_name)) then
-            ply:UnlockClass(class_name, team_name)
-        end
 
         if (payment_method == 1 and ply:SH_GetPremiumPoints() >= price) then -- paiement en GST Coins
             ply:SH_AddPremiumPoints(-price, "[SNK] Achat de la classe " .. class_name .. " équipe " .. team_name, true, true)
         elseif (ply:SH_GetStandardPoints() >= price) then
             ply:SH_AddStandardPoints(-price, nil, true, true)
+        else
+            return false
         end
 
         ply:SH_TransmitPointshop()
         ply:SH_SavePointshop()
+
+        if (not table.HasValue(ply.unlocked_classes[team_name], class_name)) then
+            ply:UnlockClass(class_name, team_name)
+        end
     end)
 end
 
