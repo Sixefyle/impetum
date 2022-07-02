@@ -12,6 +12,7 @@ include("vgui/cl_scoreboard.lua")
 include("vgui/cl_class_selection.lua")
 include("vgui/cl_team_selection.lua")
 include("vgui/cl_build_select.lua")
+include("vgui/cl_winner_board.lua")
 
 local GUIToggled = false
 local mouseX, mouseY = ScrW() / 2, ScrH() / 2

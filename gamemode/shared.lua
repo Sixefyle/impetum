@@ -5,6 +5,10 @@ GM.Email = "N/A"
 GM.Website = "https://discord.gg/peaCt8KYDG"
 GM.TeamBased = true
 DeriveGamemode( "sandbox" )
+
+GM.PointsToWin = 10
+GM.EldienPoints = 0
+GM.MahrPoints = 0
 ------------------------------------------------------------------
 function GM:Initialize()
 	print("Lancement d'Impetum")

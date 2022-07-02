@@ -16,6 +16,7 @@ function GM:GetPlayerScoreInfo()
 		players[ply]["deaths"] = ply:Deaths()
 		players[ply]["ping"] = ply:Ping()
 		players[ply]["name"] = ply:Nick()
+		players[ply]["points"] = ply:GetNWInt("Points")
 	end
 
 	return players
@@ -225,7 +226,7 @@ function GM:GetScoreBoardPanel()
 			player_points:Dock(LEFT)
 			player_points:DockMargin(65, 0, 0, 0)
 			player_points.Paint = function(panel, w, h)
-				draw.SimpleText(1748, "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				draw.SimpleText(ply:GetNWInt("Points"), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			end
 
 			index = index + 1
@@ -234,14 +235,14 @@ function GM:GetScoreBoardPanel()
 
 	RefreshList()
 
-	hide_button = vgui.Create("DButton", self.scoreboard_base)
-	hide_button:SetPos(0,0)
-	hide_button:SetSize(100,100)
-	hide_button:SetText("_")
+	-- hide_button = vgui.Create("DButton", self.scoreboard_base)
+	-- hide_button:SetPos(0,0)
+	-- hide_button:SetSize(100,100)
+	-- hide_button:SetText("_")
 
-	hide_button.DoClick = function()
-		self.scoreboard_base:ToggleVisible()
-	end
+	-- hide_button.DoClick = function()
+	-- 	self.scoreboard_base:ToggleVisible()
+	-- end
 end
 
 function GM:ScoreboardShow()

@@ -34,6 +34,11 @@ GST_SNK.Images = {
 	["CLASS_SELECTION_BAR"] = base_image_path .. "class_bar.png",
 	["CLASS_SELECTION_BAR_TITLE"] = base_image_path .. "class_bar_title.png",
 
+	["CLASS_ICON_TITAN_5M"] = base_image_path .. "icon/titan_5m.png",
+	["CLASS_ICON_TITAN_7M"] = base_image_path .. "icon/titan_7m.png",
+	["CLASS_ICON_TITAN_10M"] = base_image_path .. "icon/titan_10m.png",
+	["CLASS_ICON_TITAN_15M"] = base_image_path .. "icon/titan_15m.png",
+
 	["CLASS_ICON_ATTACK"] = base_image_path .. "icon/titan_attack.png",
     ["CLASS_ICON_JAW"] = base_image_path .. "icon/titan_jaw.png",
     ["CLASS_ICON_FEMALE"] = base_image_path .. "icon/titan_female.png",
@@ -83,6 +88,11 @@ GST_SNK.Images = {
 
 	["PLAYER_HUD"] = base_image_path .. "hud/hud.png",
 	["PLAYER_HUD_GAZ"] = base_image_path .. "hud/gaz.png",
+
+	["CAPTURE_POINTS"] = base_image_path .. "hud/capture_points.png",
+
+	["WINNER_HUD_ELDIEN"] = base_image_path .. "hud/endscreen_eldien.png",
+	["WINNER_HUD_MAHR"] = base_image_path .. "hud/endscreen_mahr.png",
 }
 
 if CLIENT then
@@ -91,6 +101,14 @@ if CLIENT then
 		["GOTHAM"] = "Gotham"
 	}
 
+	surface.CreateFont( "default_snk_xl", {
+		font = GST_SNK.Fonts.DEFAULT,
+		extended = false,
+		size = 64,
+		weight = 500,
+		antialias = true,
+	} )
+
 	surface.CreateFont( "default_snk", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
@@ -98,6 +116,14 @@ if CLIENT then
 		weight = 500,
 		antialias = true,
 
+	} )
+
+	surface.CreateFont( "default_snk_large", {
+		font = GST_SNK.Fonts.DEFAULT,
+		extended = false,
+		size = 36,
+		weight = 500,
+		antialias = true,
 	} )
 
 	surface.CreateFont( "default_snk_normal", {

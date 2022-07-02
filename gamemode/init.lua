@@ -12,6 +12,7 @@ AddCSLuaFile("vgui/cl_scoreboard.lua")
 AddCSLuaFile("vgui/cl_team_selection.lua")
 AddCSLuaFile("vgui/cl_class_selection.lua")
 AddCSLuaFile("vgui/cl_build_select.lua")
+AddCSLuaFile("vgui/cl_winner_board.lua")
 include("shared.lua")
 include("sv_net.lua")
 include("sh_resources.lua")
@@ -20,22 +21,126 @@ include("sh_class.lua")
 include("player.lua")
 include("spawn_replace.lua")
 include("utils.lua")
-include("sv_desctructible_build_config.lua")
-
-
+include("sv_map_config.lua")
 
 -- util.AddNetworkString("InitializePlayerPref")
 -- util.AddNetworkString("SavePlayerPref")
+util.AddNetworkString("ReceiveTeamPoints")
+util.AddNetworkString("ShowWinnerPanel")
+
+local function SpawnFlags()
+    if (GST_SNK.Maps[game.GetMap()].CaptureFlags and not table.IsEmpty(GST_SNK.Maps[game.GetMap()].CaptureFlags)) then
+        for _, flag in pairs(GST_SNK.Maps[game.GetMap()].CaptureFlags ) do
+            if (IsValid(flag)) then
+                flag:Remove()
+            end
+        end
+
+        table.Empty(GST_SNK.Maps[game.GetMap()].CaptureFlags)
+    end
+
+    GST_SNK.Maps[game.GetMap()].CaptureFlags = {}
+    for index, position in ipairs(GST_SNK.Maps[game.GetMap()].CaptureFlagsPosition) do
+        GST_SNK.Maps[game.GetMap()].CaptureFlags[index] = GST_SNK.Utils:SpawnCaptureFlag(position, index)
+    end
+end
+
+function GM:SendCapturesPointsInfo(ply)
+    net.Start("ReceiveTeamsInfo")
+        net.WriteUInt(GAMEMODE.EldienPoints, 8)
+        net.WriteUInt(GAMEMODE.MahrPoints, 8)
+
+        for _, flag in pairs(GST_SNK.Maps[game.GetMap()].CaptureFlags) do
+            net.WriteColor(flag.OwnerTeam and flag.OwnerTeam.color or Color(100,100,100,100))
+        end
+    net.Send(ply)
+end
 
 function GM:Initialize()
     timer.Simple(0.01, PlaceSpawns)
     RunConsoleCommand("sbox_godmode", "0")
+
+    SpawnFlags()
+    self.gameEnded = false
+
+    timer.Create("AddTeamPoints", 5, 0, function()
+        local _, err = pcall(function() self:AddTeamPoints() end)
+
+        if (err) then
+            print("Erreur lors de l'ajout des points aux équipes !")
+            print(err)
+            SpawnFlags()
+        end
+    end)
+end
+
+local function GetBestPlayers(winnerTeam)
+    if (not winnerTeam) then return end
+    local players = {}
+    local index = 1
+    for _, ply in pairs(player.GetAll()) do
+        if (IsValid(ply) and ply:GetTeam() == winnerTeam) then
+            players[index] = {}
+            players[index]["name"] = ply:GetName()
+            players[index]["points"] = ply:GetNWInt("Points")
+            index = index + 1
+        end
+    end
+    table.sort(players, function(a, b) return a.points > b.points end)
+
+    return players
+end
+
+function GM:AddTeamPoints()
+    if (self.gameEnded) then return end
+
+    for _, flag in pairs(GST_SNK.Maps[game.GetMap()].CaptureFlags) do
+        if (not flag.OwnerTeam) then continue end
+
+        if (flag.OwnerTeam.name == "Eldien") then
+            self.EldienPoints = self.EldienPoints + 1
+        else
+            self.MahrPoints = self.MahrPoints + 1
+        end
+    end
+
+    net.Start("ReceiveTeamPoints")
+        net.WriteUInt(self.EldienPoints, 8)
+        net.WriteUInt(self.MahrPoints, 8)
+    net.Broadcast()
+
+    if (self.EldienPoints >= self.PointsToWin or self.MahrPoints >= self.PointsToWin) then
+        self.gameEnded = true
+        local winnerTeam = self.EldienPoints >= self.PointsToWin and GST_SNK.Teams.Eldien or GST_SNK.Teams.Mahr
+        self:PauseGame()
+        net.Start("ShowWinnerPanel")
+            local bestPlayers = GetBestPlayers(winnerTeam)
+            net.WriteUInt(winnerTeam.id, 2)
+            net.WriteTable(bestPlayers)
+        net.Broadcast()
+
+        timer.Simple(15, function()
+            local test = table.Random(table.GetKeys(GST_SNK.Maps))
+            RunConsoleCommand("nextlevel", test)
+            game.LoadNextMap()
+        end)
+    end
+end
+
+function GM:PauseGame()
+    for _, ent in pairs(ents.GetAll()) do
+        if (IsValid(ent)) then
+            ent:SetMoveType(MOVETYPE_NONE)
+            if (ent:IsPlayer()) then
+                ent:Freeze(true)
+            end
+        end
+    end
 end
 
 function GM:PlayerConnect(name, ip)
     print(name .. " a rejoins la partie.")
 end
-
 
 function GM:PlayerInitialSpawn(ply)
     print("Player " .. ply:Nick() .. " has spawned.")
@@ -45,6 +150,12 @@ function GM:PlayerInitialSpawn(ply)
         ply:SendUnlockedClasses()
         GST_SNK:SwitchTeam(ply, GST_SNK.Teams.NoTeam, nil)
         --ply:ConCommand("team_menu")
+
+        if (not ply:GetNWInt("Points")) then
+            ply:SetNWInt("Points", 0)
+        end
+
+        self:SendCapturesPointsInfo(ply)
     end)
 
     ply.initialSpawn = true
@@ -283,6 +394,17 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         end
     end
 end
+
+concommand.Add("reset_flags", function()
+    SpawnFlags()
+end)
+
+concommand.Add("reset_teams_points", function()
+    GAMEMODE.EldienPoints = 0
+    GAMEMODE.MahrPoints = 0
+    GAMEMODE.gameEnded = false
+    print("Points des équipes remis à 0 !")
+end)
 
 --End Damage Modifiers
 hook.Add("PlayerSay", "MutePlayers", function(ply, text, public)

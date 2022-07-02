@@ -6,6 +6,7 @@ util.AddNetworkString("GST:Titan_Punch1")
 util.AddNetworkString("GST:Titan_Punch2")
 util.AddNetworkString("GST:Titan_Kick")
 util.AddNetworkString("GST:Titan_Die")
+util.AddNetworkString("ReceiveTeamsInfo")
 
 
 net.Receive("FireSkill", function(len, ply)

@@ -1,5 +1,17 @@
 GST_SNK.Utils = {}
 
+if CLIENT then
+    function GST_SNK.Utils:HUDPlaySound(panel, soundPath)
+        if (panel:IsHovered() and LocalPlayer().lastHoveredButton ~= panel) then
+            surface.PlaySound(soundPath)
+            LocalPlayer().lastHoveredButton = panel
+        elseif (LocalPlayer().lastHoveredButton == panel and not panel:IsHovered()) then
+            LocalPlayer().lastHoveredButton = nil
+        end
+    end
+end
+
+
 function GST_SNK.Utils:GetWorldHeightPos(pos)
     local trace = util.TraceLine( {
         start = pos,
@@ -94,4 +106,12 @@ function GST_SNK.Utils:RunAnimation(animationName, ply, netName)
             ply:SetNWString("doAnimation", "")
         end
     end)
+end
+
+function GST_SNK.Utils:SpawnCaptureFlag(position, index)
+    local flag = ents.Create("capture_point")
+    flag:Spawn()
+    flag:SetPos(position)
+    flag:SetNWInt("captureFlagIndex", index)
+    return flag
 end

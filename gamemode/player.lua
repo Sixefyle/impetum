@@ -1,9 +1,14 @@
 util.AddNetworkString("ForceHudRefresh")
 util.AddNetworkString("ShowRepairBar")
 
-local ply_meta = FindMetaTable("Player") --Defines the local player
+local ply = FindMetaTable("Player") --Defines the local player
 
-function ply_meta:GiveGamemodeWeapons()
+function ply:AddPoints(amount)
+    self:SetNWInt("Points", self:GetNWInt("Points") + amount)
+    -- Ajouter points PS ici
+end
+
+function ply:GiveGamemodeWeapons()
     if (self:GetCurrentClass()) then
         self:StripWeapons()
         for _, swep in pairs(self:GetCurrentClass().kit) do
@@ -13,7 +18,7 @@ function ply_meta:GiveGamemodeWeapons()
     end
 end
 
-function ply_meta:PickRandomModel()
+function ply:PickRandomModel()
     local GroupNumber = math.random(1, 3)
     local GenderNumber = math.random(1, 2)
     local Gender = {}
@@ -56,6 +61,7 @@ local function StopRepair(ply)
     net.Start("ShowRepairBar")
         net.WriteBool(false)
     net.Send(ply)
+    ply:StopSound("gst/hammer_sound.wav")
 end
 
 local function tempRepairBuildFunc(name)
@@ -91,6 +97,8 @@ hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
         local buildPoints = {}
         local buildName = GST_SNK.Utils:GetNearestDestructibleBuild(ply:GetPos())
         if (buildName == nil or string.len(buildName) <= 0) then return end
+
+        ply:EmitSound("gst/hammer_sound.wav")
 
         local state1, state2, state3 = GetBuildState(buildName)
 

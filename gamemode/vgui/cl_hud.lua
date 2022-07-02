@@ -1,5 +1,11 @@
 local ply = FindMetaTable("Player")
 
+ply.flagsColor = {
+	[1] = Color(150,150,150,200),
+	[2] = Color(150,150,150,200),
+	[3] = Color(150,150,150,200)
+}
+
 local function DoDrop(receiver, tableOfDroppedPanels, isDropped, menuIndex, mouseX, mouseY)
 	LocalPlayer().player_hud:SetPos(mouseX, mouseY)
 	if isDropped then
@@ -147,13 +153,14 @@ function ply:RefreshHud()
 	-- ATTACK COOLDOWN -- 
 	--if (ply:GetNWBool("ShouldShowWeaponCooldownBar")) then
 		if (self.weap_cooldown_bar) then self.weap_cooldown_bar:Remove() end
-		self:GetWeaponCooldownBar(self.Base)
+		self:GetWeaponCooldownBar(self.base)
 	--end
 
 	-- REPAIR BAR --
 	self.repair_bar = vgui.Create("DPanel", self.base)
 	self.repair_bar:SetSize(340, 60)
-	self.repair_bar:SetPos(ScrW() / 2 - 200, 40)
+	self.repair_bar:SetPos(0, 80)
+	self.repair_bar:CenterHorizontal()
 	self.repair_bar:SetBackgroundColor(Color(126,126,126, 0))
 	self.repair_bar:Hide()
 
@@ -190,6 +197,32 @@ function ply:RefreshHud()
 		local perc = ((LocalPlayer():GetNWFloat("RepairProgression") % 333) / 10) * 3
 		draw.SimpleText("Reparation: " .. perc .. "%", "default_snk_small", w / 2 - 3, 15, Color(22, 22, 22), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 	end
+
+	-- CAPTURE POINTS --
+	self:ShowCapturePoints()
+end
+
+function ply:ShowCapturePoints()
+	local panel = vgui.Create("DPanel", self.base)
+	panel:SetSize(220, 66)
+	panel:CenterHorizontal()
+	panel:SetBackgroundColor(Color(255,0,0,0))
+
+	local flags = ents.FindByClass("capture_point")
+
+	panel.Paint = function(panel, w, h)
+		draw.SimpleText(GAMEMODE.EldienPoints, "gotham_19", 40, 15, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(GAMEMODE.PointsToWin, "gotham_24", w / 2, 15, Color(235,235,235), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		draw.SimpleText(GAMEMODE.MahrPoints, "gotham_19", w - 40, 15, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+
+		draw.RoundedBox(100, 10, 36, 26, 28, LocalPlayer().flagsColor[1])
+		draw.RoundedBox(100, 96, 36, 26, 28, LocalPlayer().flagsColor[2])
+		draw.RoundedBox(100, 185, 36, 26, 28, LocalPlayer().flagsColor[3])
+	end
+
+	local panel_image = vgui.Create("DImage", panel)
+	panel_image:Dock(FILL)
+	panel_image:SetImage(GST_SNK.Images.CAPTURE_POINTS)
 end
 
 function ply:ShowRepairBar(shouldShow)
@@ -199,7 +232,6 @@ function ply:ShowRepairBar(shouldShow)
 		self.repair_bar:Hide()
 	end
 end
-
 
 function ply:ShowWeaponCooldownBar(shouldShow)
 	if (not IsValid(self) or not self.weap_cooldown_bar) then return end
@@ -354,7 +386,7 @@ end)
 
 concommand.Add("player_hud", function(ply, cmd, args)
 	if (args[1] == "reset") then
-		SavePlayerHudPos(0, 0)
+		SavePlayerHudPos(0, 200)
 		hud()
 	else
 		hud()
