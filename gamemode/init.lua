@@ -13,6 +13,8 @@ AddCSLuaFile("vgui/cl_team_selection.lua")
 AddCSLuaFile("vgui/cl_class_selection.lua")
 AddCSLuaFile("vgui/cl_build_select.lua")
 AddCSLuaFile("vgui/cl_winner_board.lua")
+AddCSLuaFile("vgui/cl_preference.lua")
+
 include("shared.lua")
 include("sv_net.lua")
 include("sh_resources.lua")
@@ -113,15 +115,26 @@ function GM:AddTeamPoints()
         self.gameEnded = true
         local winnerTeam = self.EldienPoints >= self.PointsToWin and GST_SNK.Teams.Eldien or GST_SNK.Teams.Mahr
         self:PauseGame()
-        net.Start("ShowWinnerPanel")
-            local bestPlayers = GetBestPlayers(winnerTeam)
-            net.WriteUInt(winnerTeam.id, 2)
-            net.WriteTable(bestPlayers)
-        net.Broadcast()
+
+        for _, ply in pairs(player.GetAll()) do
+            if (ply:GetTeam() == winnerTeam) then
+                ply:AddPoints(self.Rewards.Win)
+            else
+                ply:AddPoints(self.Rewards.Lose)
+            end
+        end
+
+        timer.Simple(.1, function()
+            net.Start("ShowWinnerPanel")
+                local bestPlayers = GetBestPlayers(winnerTeam)
+                net.WriteUInt(winnerTeam.id, 2)
+                net.WriteTable(bestPlayers)
+            net.Broadcast()
+        end)
 
         timer.Simple(15, function()
-            local test = table.Random(table.GetKeys(GST_SNK.Maps))
-            RunConsoleCommand("nextlevel", test)
+            local nextMap = table.Random(table.GetKeys(GST_SNK.Maps))
+            RunConsoleCommand("nextlevel", nextMap)
             game.LoadNextMap()
         end)
     end
@@ -232,13 +245,13 @@ function GM:PlayerDeath(ply, inflictor, attacker)
     ply.NextSpawnTime = CurTime() + 2
     ply.DeathTime = CurTime()
 
-    if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then
-        attacker = ply
-    end
+    -- if IsValid(attacker) and attacker:GetClass() == "trigger_hurt" then
+    --     attacker = ply
+    -- end
 
-    if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then
-        attacker = attacker:GetDriver()
-    end
+    -- if IsValid(attacker) and attacker:IsVehicle() and IsValid(attacker:GetDriver()) then
+    --     attacker = attacker:GetDriver()
+    -- end
 
     if not IsValid(inflictor) and IsValid(attacker) then
         inflictor = attacker
@@ -258,7 +271,7 @@ function GM:PlayerDeath(ply, inflictor, attacker)
     if attacker == ply then
         net.Start("PlayerKilledSelf")
 			net.WriteEntity(ply)
-			net.Broadcast()
+		net.Broadcast()
         MsgAll(attacker:Nick() .. " s'est suicidé!\n")
 
         return
@@ -286,41 +299,19 @@ end
 function GM:DoPlayerDeath(ply, attacker, dmginfo)
     ply:CreateRagdoll()
     ply:AddDeaths(1)
+    ply.canGoInSafeZone = true
 
-    if attacker:IsValid() and attacker:IsPlayer() then
-        if attacker == ply then
-            attacker:AddFrags(-1)
+    if attacker:IsValid() and attacker:IsPlayer() and attacker ~= ply then
+        if (ply:GetTeam() == GST_SNK.Teams.Titan) then
+            attacker:AddPoints(self.Rewards.PlayerTitanKill)
+        elseif (ply:GetTeam() == GST_SNK.Teams.Primordial) then
+            attacker:AddPoints(self.Rewards.PlayerPrimordialKill)
         else
-            attacker:AddFrags(1)
+            attacker:AddPoints(self.Rewards.PlayerHumanKill)
         end
+        attacker:AddFrags(1)
     end
 end
-
--- function GM:PlayerSelectSpawn(ply)
---     local default = ents.FindByClass("info_player_start")
---     local titan = ents.FindByClass("info_player_titan")
---     local corp = ents.FindByClass("info_player_corps")
---     local spectator = ents.FindByClass("info_player_spectator")
---     local mapIsAOT = string.find(string.lower(game.GetMap()), "aot_")
---     local et = ents.AOTSPAWNS
---     local import = et.CanImportEntities(game.GetMap())
---     local random_default = math.random(#default)
---     local random_titan = math.random(#titan)
---     local random_corp = math.random(#corp)
---     local random_spectator = math.random(#spectator)
-
---     if mapIsAOT or import then
---         if ply:Team() == TEAM_TITAN_N then
---             return titan[random_titan]
---         elseif ply:Team() == TEAM_CORP_N then
---             return corp[random_corp]
---         elseif ply:Team() == TEAM_SPEC_N then
---             return spectator[random_spectator]
---         end
---     else
---         return default[random_default]
---     end
--- end
 
 function GM:PlayerAuthed(ply, steamID, uniqueID)
     print("Player: " .. ply:Nick() .. " has been authenticated.")
@@ -333,50 +324,31 @@ end
 --Start Damage Modifiers
 function GM:EntityTakeDamage(ent, dmginfo)
     local attacker = dmginfo:GetAttacker()
-
-    --end
     if dmginfo ~= nil then
-        if  dmginfo:IsFallDamage() then
-            dmginfo:ScaleDamage(0)
-        end
-
-        if attacker:IsPlayer() then
-            if attacker:GetStepSize() == 170 and ent:GetName() == "AOT_Breakable_Wall_Titan" then
-                dmginfo:ScaleDamage(0.2)
-                attacker:PrintMessage(HUD_PRINTCONSOLE, "The wall's HP is at " .. tostring(ent:Health() - 100) .. " HP")
-                -- the wall hp is at ???????? il se fout de ma gueule en plus ce con, d'ou on donne les hp d'un mur..........................
-
-                if ent:Health() - 100 == 0 then
-                    for k, v in pairs(player.GetAll()) do
-                        v:PrintMessage(HUD_PRINTTALK, attacker:GetName() .. " has destroyed a wall")
-                    end
-                end
-            elseif ent:GetName() == "AOT_Breakable_Wall_Titan" then
-                dmginfo:ScaleDamage(0)
-                attacker:PrintMessage(HUD_PRINTCONSOLE, "You cannot break this wall.")
-            end
-        elseif ent:GetName() == "AOT_Breakable_Wall_Titan" then
-            dmginfo:ScaleDamage(0)
+        if(ent:IsPlayer() and table.HasValue({GST_SNK.Teams.Primordial}, ent:GetTeam()) and ent:Health() - dmginfo:GetDamage() <= 0) then
+            ent:SetHealth(1)
+            ent:GodEnable()
+            timer.Simple(GST_SNK.Utils:RunAnimation("death", ent, true) or 0, function()
+                ent:GodDisable()
+                self:DoPlayerDeath(ent, attacker, dmginfo)
+                ent:Spawn()
+            end)
         end
     end
 end
 
 function GM:PlayerShouldTakeDamage(victim, attacker)
     if cvars.Bool("sbox_godmode", false) then return false end
-    if not IsValid(victim:GetActiveWeapon()) then return true end
+    --if not IsValid(victim:GetActiveWeapon()) then return true end
 
-    if victim:GetStepSize() == 170 then
-        if attacker:IsNPC() then return false end
+    if string.match(victim:GetModel(), "titan") then
+        if attacker:IsNPC() then return true end
         if not attacker:IsPlayer() then return false end
         if not IsValid(attacker:GetActiveWeapon()) then return false end
 
-        if attacker:GetActiveWeapon():GetClass() == "gst_3dmg" or attacker:GetActiveWeapon():GetClass() == "3d_maneuver_gear_expert_c" then
-            return true
-        else
+        if attacker:GetActiveWeapon():GetClass() == "skill_musket" then
             return false
         end
-    else
-        return true
     end
 
     return true
@@ -394,6 +366,89 @@ function GM:ScalePlayerDamage(ply, hitgroup, dmginfo)
         end
     end
 end
+
+function SetupMapLua()
+    MapLua = ents.Create("lua_run")
+    MapLua:SetName("triggerhook")
+    MapLua:Spawn()
+
+    for k, v in pairs(ents.FindByClass("trigger_multiple")) do
+        if (v:GetName() == "trigger_eldien") then
+            v:Fire("AddOutput", "OnStartTouch triggerhook:RunPassedCode:hook.Run( 'EldienEnterSpawn' ):0:-1")
+            v:Fire("AddOutput", "OnEndTouch triggerhook:RunPassedCode:hook.Run( 'EldienExitSpawn' ):0:-1")
+        end
+
+        if (v:GetName() == "trigger_mahr") then
+            v:Fire("AddOutput", "OnStartTouch triggerhook:RunPassedCode:hook.Run( 'MahrEnterSpawn' ):0:-1")
+            v:Fire("AddOutput", "OnEndTouch triggerhook:RunPassedCode:hook.Run( 'MahrExitSpawn' ):0:-1")
+        end
+    end
+end
+
+hook.Add("InitPostEntity", "SetupMapLua", SetupMapLua)
+hook.Add("PostCleanupMap", "SetupMapLua", SetupMapLua)
+
+hook.Add("EldienEnterSpawn", "TestTeleportHook", function()
+    local activator, caller = ACTIVATOR, CALLER
+
+    if (IsValid(activator) and activator:IsPlayer() and activator:GetTeam() == GST_SNK.Teams.Eldien and activator.canGoInSafeZone) then
+        activator:GodEnable()
+    else
+        local vel = activator:GetVelocity() * -4
+        vel.z = vel.z * -1
+        activator:SetVelocity(vel)
+        activator:Freeze(true)
+
+        timer.Simple(2, function()
+            activator:Freeze(false)
+        end)
+
+        local weap = activator:GetActiveWeapon()
+        if (IsValid(weap) and weap:GetClass() == "gst_3dmg") then
+            weap:RemoveRopes()
+        end
+    end
+end)
+
+hook.Add("EldienExitSpawn", "TestTeleportHook", function()
+    local activator, caller = ACTIVATOR, CALLER
+
+    if (IsValid(activator) and activator:IsPlayer()) then
+        activator:GodDisable()
+        activator.canGoInSafeZone = false
+    end
+end)
+
+hook.Add("MahrEnterSpawn", "TestTeleportHook", function()
+    local activator, caller = ACTIVATOR, CALLER
+
+    if (IsValid(activator) and activator:IsPlayer() and activator:GetTeam() == GST_SNK.Teams.Mahr and activator.canGoInSafeZone) then
+        activator:GodEnable()
+    else
+        local vel = activator:GetVelocity() * -4
+        vel.z = vel.z * -1
+        activator:SetVelocity(vel)
+        activator:Freeze(true)
+
+        timer.Simple(2, function()
+            activator:Freeze(false)
+        end)
+
+        local weap = activator:GetActiveWeapon()
+        if (IsValid(weap) and weap:GetClass() == "gst_3dmg") then
+            weap:RemoveRopes()
+        end
+    end
+end)
+
+hook.Add("MahrExitSpawn", "TestTeleportHook", function()
+    local activator, caller = ACTIVATOR, CALLER
+
+    if (IsValid(activator) and activator:IsPlayer()) then
+        activator:GodDisable()
+        activator.canGoInSafeZone = false
+    end
+end)
 
 concommand.Add("reset_flags", function()
     SpawnFlags()
@@ -416,6 +471,8 @@ hook.Add("PlayerSay", "MutePlayers", function(ply, text, public)
                 net.Start("MutePlayer")
                 net.WriteEntity(v)
                 net.Send(ply)
+
+                
 
                 return false
             elseif string.match(string.lower(ply:GetName()), string.lower(cvar[2])) then

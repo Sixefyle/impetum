@@ -19,6 +19,12 @@ function ply:ShowBuildSelector()
     header_pane:SetHeight(100)
     header_pane:SetBackgroundColor(Color(0,0,0,0))
 
+    local header_title = vgui.Create("DLabel", header_pane)
+    header_title:SetPos(10,20)
+    header_title:SetSize(400,20)
+    header_title:SetText("Menu de Construction")
+    header_title:SetFont("default_snk_normal")
+
     local close_button = vgui.Create("DButton", header_pane)
     close_button:SetText("")
     close_button:Dock(RIGHT)

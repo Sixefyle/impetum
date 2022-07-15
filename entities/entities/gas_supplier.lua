@@ -1,6 +1,6 @@
 AddCSLuaFile()
 ENT.Type = "anim"
-ENT.ClassName = "gas_supplier_ent"
+ENT.ClassName = "gas_supplier"
 
 function ENT:Initialize()
     self:SetModel("models/props_c17/furnitureStove001a.mdl")

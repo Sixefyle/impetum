@@ -12,8 +12,8 @@ GST_SNK.Classes = {
             ["description"] = "Je suis une description",
             ["display_name"] = "Soldat",
             ["health"] = 100,
-            ["speed"] = 350,
-            ["max_speed"] = 650,
+            ["speed"] = 200,
+            ["max_speed"] = 300,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 0,
             ["price_gst"] = 0
@@ -90,7 +90,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg", "skill_build"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Tank"] = {
             ["id"] = 13,
@@ -103,7 +103,7 @@ GST_SNK.Classes = {
             ["attract_speed"] = 25,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Ackerman"] = {
             ["id"] = 14,
@@ -119,7 +119,7 @@ GST_SNK.Classes = {
             ["max_range"] = 900,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
     },
 
@@ -132,7 +132,7 @@ GST_SNK.Classes = {
             ["health"] = 100,
             ["speed"] = 350,
             ["max_speed"] = 650,
-            ["kit"] = {"gst_3dmg", "titan_swep_v2"},
+            ["kit"] = {"gst_3dmg"},
             ["price_std"] = 0,
             ["price_gst"] = 0
         },
@@ -218,7 +218,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Demolisseur"] = {
             ["id"] = 9,
@@ -230,7 +230,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Ingenieur"] = {
             ["id"] = 10,
@@ -242,7 +242,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Trappeur"] = {
             ["id"] = 11,
@@ -254,7 +254,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Medecin"] = {
             ["id"] = 12,
@@ -266,7 +266,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Tank"] = {
             ["id"] = 13,
@@ -279,7 +279,7 @@ GST_SNK.Classes = {
             ["attract_speed"] = 10,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Magath"] = {
             ["id"] = 14,
@@ -291,7 +291,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 650,
             ["kit"] = {"gst_3dmg"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
     },
     [GST_SNK.Teams.Titan.name] = {
@@ -316,7 +316,7 @@ GST_SNK.Classes = {
             ["max_speed"] = 400,
             ["kit"] = {"titan_base"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Titan10"] = {
             ["id"] = 3,
@@ -328,7 +328,7 @@ GST_SNK.Classes = {
             ["size"] = 10,
             ["kit"] = {"titan_base"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Titan15"] = {
             ["id"] = 4,
@@ -340,86 +340,53 @@ GST_SNK.Classes = {
             ["size"] = 15,
             ["kit"] = {"titan_base"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
     },
     [GST_SNK.Teams.Primordial.name] = {
-        ["Assaillant"] = {
+        ["Beast"] = {
             ["id"] = 1,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_ATTACK,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
-            ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
+            ["icon"] = GST_SNK.Images.CLASS_ICON_BEAST,
+            ["display_name"] = "Bestial",
+            ["health"] = 5000,
+            ["speed"] = 700,
+            ["max_speed"] = 700,
+            ["kit"] = {"primordial_beast"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
-        ["Cuirasse"] = {
+        ["Armored"] = {
             ["id"] = 2,
             ["icon"] = GST_SNK.Images.CLASS_ICON_ARMORED,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
+            ["display_name"] = "Cuirassé",
+            ["health"] = 5000,
             ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
+            ["max_speed"] = 350,
+            ["kit"] = {"primordial_armored"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
-        },
-        ["Charrette"] = {
-            ["id"] = 3,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_CART,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
-            ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
-            ["price_std"] = 1000,
-            ["price_gst"] = 750
-        },
-        ["Bestial"] = {
-            ["id"] = 4,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_BEAST,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
-            ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
-            ["price_std"] = 1000,
-            ["price_gst"] = 750
-        },
-        ["Machoire"] = {
-            ["id"] = 5,
-            ["icon"] = GST_SNK.Images.CLASS_ICON_JAW,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
-            ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
-            ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
         ["Feminin"] = {
             ["id"] = 6,
             ["icon"] = GST_SNK.Images.CLASS_ICON_FEMALE,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
+            ["display_name"] = "Féminin",
+            ["health"] = 5000,
             ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
+            ["max_speed"] = 350,
+            ["kit"] = {"primordial_female"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
-        ["Marteau darme"] = {
+        ["Asaillant"] = {
             ["id"] = 7,
             ["icon"] = GST_SNK.Images.CLASS_ICON_WARHAMMER,
-            ["display_name"] = "Soldat",
-            ["health"] = 400,
+            ["display_name"] = "Assaillant",
+            ["health"] = 5000,
             ["speed"] = 350,
-            ["max_speed"] = 650,
-            ["kit"] = {"titan_swep_v2"},
+            ["max_speed"] = 350,
+            ["kit"] = {"primordial_asaillant"},
             ["price_std"] = 1000,
-            ["price_gst"] = 750
+            ["price_gst"] = 0
         },
     },
 }
@@ -493,9 +460,13 @@ end
 
 function ply:GetSkills()
     local skills = {}
-    for _, skill in pairs(self:GetWeapons()) do
-        if (skill.Icon or skill.IconSkills) then
-            table.insert(skills, skill)
+    for _, weapon in pairs(self:GetWeapons()) do
+        if (weapon.Icon) then
+            table.insert(skills, weapon)
+        elseif (weapon.Skills) then
+            for _, skill in pairs(weapon.Skills) do
+                table.insert(skills, skill)
+            end
         end
     end
     return skills

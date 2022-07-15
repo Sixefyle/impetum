@@ -87,25 +87,35 @@ function GST_SNK.Utils:GetNearestDestructibleBuild(pos, range)
 
     for _, ent in pairs(ents.FindInSphere(pos, range)) do
         if (IsValid(ent) and not ent:IsPlayer()
-           and table.HasValue(GST_SNK.Maps[mapName].DestructibleBuild, string.match(ent:GetName(), "^[a-z]*"))) then
+           and table.HasValue(GST_SNK.Maps[mapName].DestructibleBuild, string.match(ent:GetName(), "^[a-zA-Z]*"))) then
             return ent:GetName()
         end
     end
 end
 
-function GST_SNK.Utils:RunAnimation(animationName, ply, netName)
+function GST_SNK.Utils:RunAnimation(animationName, ply, freezePlayer, time)
     ply:SetNWString("doAnimation", animationName)
     local _, animTime = ply:LookupSequence(animationName)
 
-    net.Start(netName)
+    net.Start("GST:DoAnimation")
         net.WriteEntity(ply)
+        net.WriteString(animationName)
+        net.WriteUInt(time and time or 0, 8)
     net.Broadcast()
 
-    timer.Simple(animTime, function()
-        if(ply:GetNWString("doAnimation") == animationName) then
+    if (freezePlayer) then
+        ply:Freeze(true)
+    end
+    timer.Simple(time and time or animTime, function()
+        if (ply:GetNWString("doAnimation") == animationName) then
             ply:SetNWString("doAnimation", "")
+            if (freezePlayer) then
+                ply:Freeze(false)
+            end
         end
     end)
+
+    return animTime
 end
 
 function GST_SNK.Utils:SpawnCaptureFlag(position, index)
@@ -114,4 +124,10 @@ function GST_SNK.Utils:SpawnCaptureFlag(position, index)
     flag:SetPos(position)
     flag:SetNWInt("captureFlagIndex", index)
     return flag
+end
+
+function GST_SNK.Utils:PlaySoundToPlayer(sound, ply)
+    net.Start("PlaySound")
+        net.WriteString(sound)
+    net.Send(ply)
 end

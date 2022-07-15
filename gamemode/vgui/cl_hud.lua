@@ -11,6 +11,22 @@ local function DoDrop(receiver, tableOfDroppedPanels, isDropped, menuIndex, mous
 	if isDropped then
         LocalPlayer().player_hud:SetPos(mouseX, mouseY)
 		SavePlayerHudPos(mouseX, mouseY)
+		timer.Simple(.01, function()
+			gui.EnableScreenClicker(true)
+			gui.SetMousePos( mouseX, mouseY )
+		end)
+    end
+end
+
+local function SkillDrop(receiver, tableOfDroppedPanels, isDropped, menuIndex, mouseX, mouseY)
+	LocalPlayer().cooldown_panel:SetPos(mouseX, mouseY)
+	if isDropped then
+        LocalPlayer().cooldown_panel:SetPos(mouseX, mouseY)
+		SavePlayerSkillHudPos(mouseX, mouseY)
+		timer.Simple(.01, function()
+			gui.EnableScreenClicker(true)
+			gui.SetMousePos( mouseX, mouseY )
+		end)
     end
 end
 
@@ -46,6 +62,7 @@ function ply:RefreshHud()
     self.base:Center()
     self.base:SetBackgroundColor(Color(0, 0, 0, 0))
     self.base:Receiver("playerHudDrag", DoDrop)
+    self.base:Receiver("skillsHudDrag", SkillDrop)
 
 	if (not self:GetTeam() or not self.class) then return end
 
@@ -53,7 +70,7 @@ function ply:RefreshHud()
     self.player_hud:SetSize(300, 200)
 
 	if (not self.preference.player_hud_pos) then
-		self.player_hud:SetPos(10, 10)
+		self.player_hud:SetPos(0, 200)
 	else
 		self.player_hud:SetPos(self.preference.player_hud_pos.x, self.preference.player_hud_pos.y)
 	end
@@ -88,7 +105,7 @@ function ply:RefreshHud()
     player_health_bar = vgui.Create("DPanel", self.player_hud)
     player_health_bar:SetPos(111, 75)
     player_health_bar:SetSize(186 * (self:Health() / self:GetMaxHealth()), 18)
-    player_health_bar:SetBackgroundColor(Color(9, 255, 70, 160))
+    player_health_bar:SetBackgroundColor(self.preference.health_bar_color)
 
 	if(self:Health() < self:GetMaxHealth() / 2) then
 		SetLowEffect(player_health_bar, "Health")
@@ -97,7 +114,7 @@ function ply:RefreshHud()
     player_armor_bar = vgui.Create("DPanel", self.player_hud)
     player_armor_bar:SetPos(78, 110)
     player_armor_bar:SetSize(185 * (self:Armor() / self:GetMaxArmor()), 18)
-    player_armor_bar:SetBackgroundColor(Color(17, 104, 235))
+    player_armor_bar:SetBackgroundColor(self.preference.armor_bar_color)
 
     player_class_icon = vgui.Create("DPanel", self.player_hud)
     player_class_icon:SetPos(-4, -8)
@@ -126,27 +143,37 @@ function ply:RefreshHud()
 		player_hud_gaz:SetImage(GST_SNK.Images.PLAYER_HUD_GAZ)
 	end
 
-	-- COOLDOWN --
-	cooldown_panel = vgui.Create("DPanel", self.base)
-	cooldown_panel:SetPos(0,0)
-	cooldown_panel:SetSize(450,147)
-	cooldown_panel:SetBackgroundColor(Color(0,0,0, 0))
+	-- SKILL COOLDOWN --
+	self.cooldown_panel = vgui.Create("DPanel", self.base)
+	self.cooldown_panel:SetSize(450,147)
+	self.cooldown_panel:SetBackgroundColor(Color(0,0,0, 0))
+	--self.cooldown_panel:Droppable("skillsHudDrag")
 
-	for i, weap in ipairs(LocalPlayer():GetSkills()) do
-		if (weap.Icon) then
-			local _, cooldown_panel_upper, cooldown_icon_upper = ShowSkillIcon(weap.Icon, weap.IconBack, input.GetKeyName(LocalPlayer().preference.skill_key[i]))
+	if (not self.preference.player_skill_hud_pos) then
+		self.cooldown_panel:SetPos(0,0)
+	else
+		self.cooldown_panel:SetPos(self.preference.player_skill_hud_pos.x, self.preference.player_skill_hud_pos.y)
+	end
 
-			timer.Create("refreshCooldownHud" .. weap:GetClass(), .3, 0, function()
+	player_hud_move_panel = vgui.Create("DPanel", self.cooldown_panel)
+	player_hud_move_panel:SetSize(self.cooldown_panel:GetSize())
+	player_hud_move_panel:SetBackgroundColor(Color(255,0,0,0))
+	player_hud_move_panel:SetZPos(10)
+	player_hud_move_panel:Droppable("skillsHudDrag")
+
+	for i, skill in ipairs(LocalPlayer():GetSkills()) do
+		if (type(skill) == "Weapon" and skill.Icon) then
+			local _, cooldown_panel_upper, cooldown_icon_upper = ShowSkillIcon(skill.Icon, skill.IconBack, input.GetKeyName(LocalPlayer().preference.skill_key[i]))
+
+			timer.Create("refreshCooldownHud" .. skill:GetClass(), .3, 0, function()
 				self:HudUpdateCooldown(cooldown_panel_upper, cooldown_icon_upper)
 			end)
-		elseif (weap.IconSkills) then
-			for j, skillIcon in ipairs(weap.IconSkills) do
-				local _, cooldown_panel_upper, cooldown_icon_upper = ShowSkillIcon(skillIcon)
-
-				timer.Create("refreshTitanCooldownHud" .. i, .3, 0, function()
-					self:HudUpdateTitanCooldown(j, cooldown_panel_upper, cooldown_icon_upper)
-				end)
-			end
+		else
+			local _, cooldown_panel_upper, cooldown_icon_upper =
+				ShowSkillIcon(skill.Icon, skill.IconBack, skill.Cooldown > 0 and input.GetKeyName(LocalPlayer().preference.skill_key[i]) or nil)
+			timer.Create("refreshTitanCooldownHud" .. i, .3, 0, function()
+				self:HudUpdateMultipleCooldown(cooldown_panel_upper, cooldown_icon_upper, i)
+			end)
 		end
 	end
 
@@ -279,7 +306,7 @@ function ply:WeaponCooldownBar(timeLeft)
 end
 
 function ShowSkillIcon(icon, iconBack, key)
-	cooldown_icon_lower = vgui.Create("DImage", cooldown_panel)
+	cooldown_icon_lower = vgui.Create("DImage", LocalPlayer().cooldown_panel)
 	cooldown_icon_lower:Dock(LEFT)
 	cooldown_icon_lower:SetSize(147,147)
 	cooldown_icon_lower:SetImageColor(Color(100,100,100))
@@ -295,14 +322,16 @@ function ShowSkillIcon(icon, iconBack, key)
 	cooldown_icon_upper:SetSize(147, 147)
 	cooldown_icon_upper:SetImage(icon)
 
-	button_panel = vgui.Create("DPanel", cooldown_icon_lower)
-	button_panel:SetPos(0, 115)
-	button_panel:CenterHorizontal(.635)
-	button_panel:SetSize(30,30)
+	if (key) then
+		button_panel = vgui.Create("DPanel", cooldown_icon_lower)
+		button_panel:SetPos(0, 115)
+		button_panel:CenterHorizontal(.635)
+		button_panel:SetSize(30,30)
 
-	button_panel.Paint = function(panel, w, h)
-		draw.RoundedBox(5, 0, 0, 25, 25, Color(202,202,202))
-		draw.SimpleText(key, "gotham_24", 12, 12, Color(51,51,51), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		button_panel.Paint = function(panel, w, h)
+			draw.RoundedBox(5, 0, 0, 25, 25, Color(202,202,202))
+			draw.SimpleText(key, "gotham_24", 12, 12, Color(51,51,51), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		end
 	end
 
 	return cooldown_icon_lower, cooldown_panel_upper, cooldown_icon_upper
@@ -339,9 +368,36 @@ function ply:HudUpdateCooldown(panel_upper, icon_upper)
 	end
 end
 
+function ply:HudUpdateMultipleCooldown(panel_upper, icon_upper, skillId)
+	local current = 147
+
+	local panelX = panel_upper:GetPos()
+	local iconX = icon_upper:GetPos()
+
+	local weap = LocalPlayer():GetActiveWeapon()
+	local skill = weap.Skills[skillId]
+
+	if (IsValid(weap) and not timer.Exists("HudSkillUpdate" .. skill.Name)) then
+		local savedSkill = weap
+		timer.Create("HudSkillUpdate" .. skill.Name, 0, 0, function()
+			if (savedSkill and savedSkill:GetCooldown(skillId) > CurTime()) then
+				local cooldownLeft = savedSkill:GetTimeCooldown(skillId)
+				local cooldown = savedSkill:GetNWFloat(skillId .. "LastCooldown")
+
+				current = (cooldownLeft / cooldown) * 147
+				panel_upper:SetPos(panelX, current)
+				icon_upper:SetPos(iconX, -current)
+			else
+				timer.Remove("HudSkillUpdate" .. skill.Name)
+			end
+		end)
+	end
+end
+
 function ply:HudRefreshGas()
-	local weap = self:GetActiveWeapon()
-	if (not weap:GetNWInt("MaxGas")) then return end
+	local weap = self:GetWeapon("gst_3dmg")
+
+	if (not IsValid(weap) or not weap:GetNWInt("MaxGas")) then return end
 
 	self.player_gaz_bar:SetSize(174 * (weap:GetGas() / weap:GetNWInt("MaxGas")), 20)
 
@@ -387,6 +443,7 @@ end)
 concommand.Add("player_hud", function(ply, cmd, args)
 	if (args[1] == "reset") then
 		SavePlayerHudPos(0, 200)
+		SavePlayerSkillHudPos(0, 0)
 		hud()
 	else
 		hud()

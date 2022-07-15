@@ -1,11 +1,12 @@
 util.AddNetworkString("ForceHudRefresh")
 util.AddNetworkString("ShowRepairBar")
+util.AddNetworkString("SendPlayerShortcut")
 
 local ply = FindMetaTable("Player") --Defines the local player
 
 function ply:AddPoints(amount)
     self:SetNWInt("Points", self:GetNWInt("Points") + amount)
-    -- Ajouter points PS ici
+    self:SH_AddStandardPoints(amount)
 end
 
 function ply:GiveGamemodeWeapons()
@@ -72,6 +73,8 @@ local function tempRepairBuildFunc(name)
             table.insert(buildPoints, point)
         end
     end
+
+    table.sort(buildPoints, function(a, b) return a:GetName() > b:GetName() end)
 
     local state1, state2, state3 = GetBuildState(name)
     if (state1 == nil) then
@@ -160,5 +163,13 @@ net.Receive("TeamSelect", function(length, ply)
         --ply:GiveGamemodeWeapons()
     else
         ply:ChatPrint("Une erreur s'est produite, veuillez recommencer...")
+    end
+end)
+
+net.Receive("SendPlayerShortcut", function(len, ply)
+    if (IsValid(ply)) then
+        print("test sendplayershortcut")
+        ply.preference = {}
+        ply.preference.server_only_sc = net.ReadTable()
     end
 end)

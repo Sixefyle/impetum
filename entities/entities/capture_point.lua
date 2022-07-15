@@ -2,7 +2,7 @@ AddCSLuaFile()
 ENT.Type = "anim"
 ENT.Spawnable = true
 ENT.AdminSpawnable = true
-ENT.PrintName = "fuck green"
+ENT.PrintName = "Point de capture"
 ENT.Category = "GST"
 
 ENT.State = {
@@ -25,6 +25,15 @@ function ENT:Initialize()
 
     self:ManipulateBonePosition(4, Vector(0, 0, 200), true)
 
+    local phys = self:GetPhysicsObject()
+    if (IsValid(phys)) then
+        phys:EnableMotion(false)
+    end
+
+    if SERVER then
+        self:Fire("setanimation","Idle",.1)
+    end
+
     -- for i = 1, self:GetBoneCount() do
     --     print(i, self:GetBoneName(i))
     -- end
@@ -38,7 +47,7 @@ function ENT:Initialize()
         end
 
         for _, ent in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
-            if IsValid(ent) and ent:IsPlayer() then
+            if IsValid(ent) and ent:IsPlayer() and ent:Alive() then
                 table.insert(players, ent)
             end
         end
@@ -53,12 +62,18 @@ end
 
 function ENT:CanTakeCapturePoint()
     local canTakePoint = true
-    if (self.OwnerTeam) then
-        for _, ply in pairs(self.PlayersInRange) do
-            if (ply:GetTeam() == self.OwnerTeam) then
-                canTakePoint = false
-                break
+    local teamsInside = {}
+
+    for _, ply in pairs(self.PlayersInRange) do
+        if (not table.HasValue(teamsInside, ply:GetTeam())) then
+            table.insert(teamsInside, ply:GetTeam())
+            if (#teamsInside > 1) then
+                return
             end
+        end
+
+        if ((self.OwnerTeam and ply:GetTeam() == self.OwnerTeam) or not table.HasValue({GST_SNK.Teams.Eldien, GST_SNK.Teams.Mahr}, ply:GetTeam())) then
+            canTakePoint = false
         end
     end
 
@@ -81,7 +96,7 @@ function ENT:CanTakeCapturePoint()
 end
 
 function ENT:SlowResetCapturePoint()
-    self.Progression = math.Clamp(self.Progression + .2, 0, self.MaxProgression)
+    self.Progression = math.Clamp(self.Progression + .6, 0, self.MaxProgression)
 
     if SERVER then
         self:ManipulateBonePosition(4, Vector(0, 0, 120 - (self.MaxProgression - self.Progression) * 2.4), true)
@@ -94,7 +109,7 @@ function ENT:TakeCapturePoint()
     -- 10 sec
     -- 100%
     -- 100 / (22 * 10) 
-    self.Progression = math.Clamp(self.Progression - 0.3, 0, self.MaxProgression) -- 60sec pour remonter
+    self.Progression = math.Clamp(self.Progression - 0.6, 0, self.MaxProgression) -- 60sec pour remonter
 
     if SERVER then
         self:ManipulateBonePosition(4, Vector(0, 0, 120 + (self.MaxProgression - self.Progression) * -2.4), true)
@@ -108,7 +123,7 @@ function ENT:TakeCapturePoint()
         if SERVER then
             for _, ply in pairs(self.PlayersInRange) do
                 if (IsValid(ply) and ply:IsPlayer()) then
-                    ply:AddPoints(5)
+                    ply:AddPoints(GAMEMODE.Rewards.CaptureFlag)
                 end
             end
         end

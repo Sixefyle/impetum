@@ -21,7 +21,15 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 SWEP.NextReload = 0
-SWEP.TitanModel = "models/gst/titan1.mdl"
+SWEP.TitanModel = {
+    "models/gst/titan_1.mdl",
+    "models/gst/titan_2.mdl",
+    "models/gst/titan_3.mdl",
+    "models/gst/titan_4.mdl",
+    "models/gst/titan_5.mdl",
+    "models/gst/titan_6.mdl",
+    "models/gst/titan_7.mdl",
+} 
 SWEP.BaseHeight = 7
 SWEP.HumanBaseHeight = 1.8
 SWEP.AttackSpeed = 1
@@ -48,7 +56,11 @@ function SWEP:Deploy()
     local realSize = owner:GetCurrentClass().size and owner:GetCurrentClass().size or self.BaseHeight
     self:SetNWInt("Size", realSize / self.HumanBaseHeight)
     self:SetHoldType(self.HoldType)
-    owner:SetModel(self.TitanModel)
+    owner:SetModel(table.Random(self.TitanModel))
+    timer.Simple(.1, function()
+        owner:SetBodygroup(1, math.random(0, 13))
+        owner:SetSkin(math.random(0, 5))
+    end)
     owner:SetModelScale(self:GetNWInt("Size"), 1)
     owner:SetViewOffset(Vector(0, 0, 64 * self:GetNWInt("Size")))
     owner:Activate()
@@ -85,15 +97,19 @@ end
 function SWEP:GrabPlayer(ply)
     if IsValid(ply) then
         ply:SetMoveType(MOVETYPE_NONE)
-        GST_SNK.Utils:RunAnimation("grab_player_manger", self:GetOwner(), "GST:Titan_Grab_Manger")
+        GST_SNK.Utils:RunAnimation("grab_player_manger", self:GetOwner())
         local _, eatAnimTime = self:GetOwner():LookupSequence("grab_player_manger")
         self:SetNextPrimaryFire(CurTime() + eatAnimTime)
         self:SetNextSecondaryFire(CurTime() + eatAnimTime)
 
         timer.Create("grabPlayer" .. self:EntIndex(), 0, 0, function()
-            local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2"))
-            handPos = LerpVector(FrameTime() * 0.01, self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2")) + Vector(0,0, -50), handPos )
-            ply:SetPos(handPos)
+            if (IsValid(self) and IsValid(ply) and ply:Alive()) then
+                local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2"))
+                handPos = LerpVector(FrameTime() * 0.01, self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2")) + Vector(0,0, -50), handPos )
+                ply:SetPos(handPos)
+            else
+                timer.Remove("grabPlayer" .. self:EntIndex())
+            end
         end)
 
         timer.Simple(eatAnimTime - 1, function()
@@ -110,8 +126,7 @@ function SWEP:Reload()
         local _, animTime = self:GetOwner():LookupSequence("grab_player")
 
         if SERVER then
-            self:GetOwner():Freeze(true)
-            GST_SNK.Utils:RunAnimation("grab_player", self:GetOwner(), "GST:Titan_Grab")
+            GST_SNK.Utils:RunAnimation("grab_player", self:GetOwner(), true)
 
             timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
                 local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:LeftHandThumb2"))
@@ -124,16 +139,15 @@ function SWEP:Reload()
                     end
                 end
 
-                if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
-                    if not IsValid(grabbedPlayer) then
-                        self:GetOwner():Freeze(false)
-                    end
-                end
+                -- if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
+                --     if not IsValid(grabbedPlayer) then
+                --         self:GetOwner():Freeze(false)
+                --     end
+                -- end
             end)
         else
             self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
         end
-        self:GetOwner():AnimRestartMainSequence()
         self:SetNextReload(CurTime() + animTime)
     end
 end
@@ -143,8 +157,7 @@ function SWEP:SecondaryAttack()
         local _, animTime = self:GetOwner():LookupSequence("kick")
 
         if SERVER then
-            self:GetOwner():Freeze(true)
-            self:GetOwner():SetNWString("doAnimation", "kick")
+            GST_SNK.Utils:RunAnimation("kick", self:GetOwner(), true)
             local damagedPlayers = {}
             local buildDestroyed = false
 
@@ -170,17 +183,11 @@ function SWEP:SecondaryAttack()
                         end
                     end
                 end
-
-                if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
-                    self:GetOwner():Freeze(false)
-                    self:GetOwner():SetNWString("doAnimation", "")
-                end
             end)
         else
             self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
         end
 
-        self:GetOwner():AnimRestartMainSequence()
         self:SetNextSecondaryFire(CurTime() + animTime)
     end
 end
@@ -194,8 +201,7 @@ function SWEP:PrimaryAttack()
         _, animTime = self:GetOwner():LookupSequence(animationName)
 
         if SERVER then
-            self:GetOwner():Freeze(true)
-            GST_SNK.Utils:RunAnimation("punch1", self:GetOwner(), "GST:Titan_Punch1")
+            GST_SNK.Utils:RunAnimation(animationName, self:GetOwner(), true)
             local damagedPlayers = {}
             local buildDestroyed = false
 
@@ -220,10 +226,6 @@ function SWEP:PrimaryAttack()
                             end
                         end
                     end
-                end
-
-                if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
-                    self:GetOwner():Freeze(false)
                 end
             end)
         else

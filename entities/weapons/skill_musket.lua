@@ -49,7 +49,7 @@ function SWEP:PrimaryAttack()
         end
 
         self:SetNextPrimaryFire(nextAttack)
-        self:ShootBullet(100, 1, 0, "self.Primary.Ammo", 1, 1)
+        self:ShootBullet(2500, 1, 0, "self.Primary.Ammo", 1, 1)
 
         timer.Simple(.01, function()
             local _, animTime = self:LookupSequence("reload")

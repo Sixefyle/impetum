@@ -36,8 +36,8 @@ if SERVER then
     function SWEP:SecondaryAttack()
         if (self:CanPrimaryAttack()) then
             local trace = self:GetOwner():GetEyeTrace()
-            local ent = trace.Ent
-            if (IsValid(ent) and IsPlayer(ent)) then
+            local ent = trace.Entity
+            if (IsValid(ent) and ent:IsPlayer()) then
                 ent:SetHealth(ent:GetMaxHealth())
                 self:SetCooldown()
             else

@@ -22,43 +22,25 @@ SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 
 SWEP.BaseCooldown = 1
-SWEP.Icon = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ARTILLERY
-SWEP.IconBack = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ARTILLERY_BACK
+SWEP.Icon = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ENGINEER
+SWEP.IconBack = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ENGINEER_BACK
 
 SWEP.AvailableBuild = {
-    ["models/props_c17/fence01a.mdl"] = {
-        ["Name"] = "Test 1",
-        ["Description"] = "Une belle description pour décrire l'objet en question",
+    ["models/props_c17/oildrum001.mdl"] = {
+        ["Name"] = "Barril",
+        ["Description"] = "Un barril vide",
         ["Time"] = 30,
         ["EntityClass"] = "build_prop"
     },
     ["models/props_c17/concrete_barrier001a.mdl"] = {
-        ["Name"] = "Test 2",
-        ["Description"] = "Une belle description pour décrire l'objet en question",
-        ["Time"] = 30,
-        ["EntityClass"] = "build_prop"
-    },
-    ["models/props_vehicles/tire001c_car.mdl"] = {
-        ["Name"] = "Test 2",
-        ["Description"] = "Une belle description pour décrire l'objet en question",
-        ["Time"] = 30,
-        ["EntityClass"] = "build_prop"
-    },
-    ["models/props_c17/FurnitureWashingmachine001a.mdl"] = {
-        ["Name"] = "Test 2",
-        ["Description"] = "Une belle description pour décrire l'objet en question",
-        ["Time"] = 30,
-        ["EntityClass"] = "build_prop"
-    },
-    ["models/props_combine/weaponstripper.mdl"] = {
-        ["Name"] = "Test 2",
-        ["Description"] = "Une belle description pour décrire l'objet en question",
+        ["Name"] = "Petit mur",
+        ["Description"] = "Un petit mur pouvant bloquer les projectils",
         ["Time"] = 30,
         ["EntityClass"] = "build_prop"
     },
     ["models/props_lab/blastdoor001a.mdl"] = {
         ["Name"] = "Porte",
-        ["Description"] = "Une belle description pour décrire l'objet en question",
+        ["Description"] = "Une porte...",
         ["Time"] = 10,
         ["EntityClass"] = "build_prop"
     }
@@ -130,6 +112,6 @@ if SERVER then
     end)
 
     function SWEP:UseSkill()
-        self:GetOwner():SetHealth(self:GetOwner():GetMaxHealth())
+        --self:GetOwner():SetHealth(self:GetOwner():GetMaxHealth())
     end
 end

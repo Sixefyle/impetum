@@ -6,7 +6,8 @@ SWEP.WorldModel = "models/weapons/w_pistol.mdl"
 SWEP.Base = "base_skill"
 
 SWEP.BaseCooldown = 5
-SWEP.Icon = GST_SNK.Images.CLASS_ICON_ELDIEN_TANK
+SWEP.Icon = GST_SNK.Images.SKILL_HUMAN_ELDIEN_SUPPLIER
+SWEP.IconBack = GST_SNK.Images.SKILL_HUMAN_ELDIEN_SUPPLIER_BACK
 SWEP.Duration = 5
 
 function SWEP:Initialize()

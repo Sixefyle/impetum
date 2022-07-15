@@ -1,7 +1,7 @@
 "impetum"
 {
 	"base"		"base"
-	"title"		"Impetum"
+	"title"		"Attack On Titan - Arena"
 	"maps"		"^gst_"
 	"category"	"pvp"
 	"menusystem"	"1"

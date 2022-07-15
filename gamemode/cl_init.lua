@@ -13,6 +13,7 @@ include("vgui/cl_class_selection.lua")
 include("vgui/cl_team_selection.lua")
 include("vgui/cl_build_select.lua")
 include("vgui/cl_winner_board.lua")
+include("vgui/cl_preference.lua")
 
 local GUIToggled = false
 local mouseX, mouseY = ScrW() / 2, ScrH() / 2
@@ -50,4 +51,12 @@ end
 
 usermessage.Hook("PlayerSuicideAOT",PlayerSuicide)
 
+hook.Add("PlayerButtonDown", "showCursor", function(ply, button)
+    if (button == KEY_ESCAPE and gui.MouseX() ~= 0) then
+        gui.EnableScreenClicker(false)
+    end
 
+    if (IsFirstTimePredicted() and button == KEY_F3) then
+        gui.EnableScreenClicker(gui.MouseX() == 0)
+    end
+end)

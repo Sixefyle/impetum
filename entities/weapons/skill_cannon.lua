@@ -75,6 +75,7 @@ if SERVER then
             canon:SetAngles(angle)
             canon:Spawn()
             canon:SetPos(pos)
+            canon:EmitSound("gst/build_place.wav")
             ply.PlacedCanon = canon
         end
     end)

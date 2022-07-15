@@ -46,15 +46,25 @@ function ShowWinnerBoard(winner, bestPlayers)
         time_before_next_game:SetText(timeLeft)
     end)
 
+    local player_score = vgui.Create("DLabel", LocalPlayer().winner_hud_base)
+    player_score:SetPos(0, 150)
+    player_score:SetFont("default_snk_normal")
+    player_score:SetColor(Color(221,218,22))
+    player_score:SetText("+" .. LocalPlayer():GetNWInt("Points") .. " Points standards")
+    player_score:SetSize(player_score:GetTextSize())
+    player_score:CenterHorizontal()
+
+    local eldienScore = GAMEMODE.EldienPoints
+    local mahrScore = GAMEMODE.MahrPoints
     local teams_score = vgui.Create("DPanel", LocalPlayer().winner_hud_base)
-    teams_score:SetPos(0, 150)
+    teams_score:SetPos(0, 180)
     teams_score:SetSize(300,100)
     teams_score:CenterHorizontal()
 
     teams_score.Paint = function(panel, w, h)
-        draw.SimpleText(GAMEMODE.EldienPoints, "default_snk_xl", 115, h / 2, GAMEMODE.EldienPoints > GAMEMODE.PointsToWin and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+        draw.SimpleText(eldienScore, "default_snk_xl", 115, h / 2, eldienScore >= GAMEMODE.PointsToWin and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
         draw.SimpleText(" - ", "default_snk_xl",  w / 2 - 15, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        draw.SimpleText(GAMEMODE.MahrPoints, "default_snk_xl", 155, h / 2, GAMEMODE.MahrPoints > GAMEMODE.PointsToWin and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        draw.SimpleText(mahrScore, "default_snk_xl", 155, h / 2, mahrScore >= GAMEMODE.PointsToWin and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
     end
 
     local winner_image = vgui.Create("DImage", LocalPlayer().winner_hud_base)
@@ -130,11 +140,15 @@ function ShowWinnerBoard(winner, bestPlayers)
 end
 
 concommand.Add("show_winner_hud", function()
-    GAMEMODE.MahrPoints = 0
+    GAMEMODE.MahrPoints = 449
     GAMEMODE.EldienPoints = 450
     ShowWinnerBoard(GST_SNK.Teams.Mahr, {
         [1] = {["name"] = "Dave Leauper", ["points"] = 745152247412},
         [2] = {["name"] = "Green", ["points"] = 14574},
         [3] = {["name"] = "Kamiko", ["points"] = -7},
     })
+
+    timer.Simple(15, function()
+        LocalPlayer().winner_hud_base:Remove()
+    end)
 end)

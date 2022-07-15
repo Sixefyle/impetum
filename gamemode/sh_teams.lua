@@ -18,12 +18,14 @@ GST_SNK.Teams = {
         id = 3,
         name = "Titan",
         color = Color(175, 51, 51),
+        spawn_name = "spawn_titan",
         require_vip = false
     },
     ["Primordial"] = {
         id = 4,
         name = "Primordial",
         color = Color(207, 164, 47),
+        spawn_name = "spawn_titan",
         require_vip = true
     },
     ["Spectator"] = {
@@ -55,50 +57,88 @@ function GM:PlayerSelectSpawn(ply, transition)
     return spawns[math.random(#spawns)]
 end
 
+
+local function GetEquippedSkin(ply)
+    for _, item in pairs(ply:SH_GetEquipped()) do
+        if (string.match(item.class, "3dmg") == "3dmg") then
+            ply.equiped3Dmg = item
+            return true
+        end
+    end
+    return false
+end
+
+local function Handle3Dmg(ply, shouldShow)
+    local has = GetEquippedSkin(ply)
+
+    if (not has) then
+        has, ply.equiped3Dmg = ply:SH_HasItem("3dmg_first")
+    end
+
+    if (shouldShow) then
+        if (not has) then
+            ply.equiped3Dmg = SH_POINTSHOP:NewItemTable("3dmg_first")
+            ply:SH_AddItem(ply.equiped3Dmg, true, true)
+            ply:SH_TransmitPointshop()
+            ply:SH_SavePointshop()
+        end
+        SH_POINTSHOP:EquipItem(ply, ply.equiped3Dmg.id, true, true)
+    end
+
+    ply:SH_TransmitEquipped(player.GetAll())
+end
+
 function GST_SNK:InitTeamStats()
     if (not GST_SNK.Teams.Eldien.set_player_info) then
         GST_SNK.Teams.Eldien.set_player_info = function(ply)
-            --ply:SetModel("models/player/odessa.mdl")
-            ply:PickRandomModel()
+
+            Handle3Dmg(ply, true)
+
+            ply:SetModel("models/hydralis/kaouet/soldat_masculin/brigade/soldat_masculin_brigade_1.mdl")
             ply:GodDisable()
+            ply:SetNoTarget(false)
             ply:SetModelScale(1, 0)
-            ply:SetPlayerColor(Vector(.9, .8, .7))
-            ply:SetHull(Vector(-16, -16, 0), Vector(16, 16, 72))
-            ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
+            --ply:SetPlayerColor(Vector(.9, .8, .7))
+            --ply:SetHull(Vector(-16, -16, 0), Vector(16, 16, 72))
+            --ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
             ply:SetViewOffset(Vector(0, 0, 64))
             ply:SetViewOffsetDucked(Vector(0, 0, 32))
-            ply:ResetHull()
+            --ply:ResetHull()
         end
     end
 
     if (not GST_SNK.Teams.Mahr.set_player_info) then
         GST_SNK.Teams.Mahr.set_player_info = function(ply)
-            --ply:SetModel("models/player/odessa.mdl")
-            ply:PickRandomModel()
+            Handle3Dmg(ply, true)
+            ply:SetModel("models/gst/playermodel/mahr_2.mdl")
+            timer.Simple(.1, function()
+                ply:SetBodygroup(11, math.random(1, 9))
+            end)
             ply:GodDisable()
+            ply:SetNoTarget(false)
             ply:SetModelScale(1, 0)
-            ply:SetPlayerColor(Vector(.9, .8, .7))
-            ply:SetHull(Vector(-16, -16, 0), Vector(16, 16, 72))
-            ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
+            --ply:SetPlayerColor(Vector(.9, .8, .7))
+            --ply:SetHull(Vector(-16, -16, 0), Vector(16, 16, 72))
+            --ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
             ply:SetViewOffset(Vector(0, 0, 64))
             ply:SetViewOffsetDucked(Vector(0, 0, 32))
-            ply:ResetHull()
+            --ply:ResetHull()
         end
     end
 
     if (not GST_SNK.Teams.Titan.set_player_info) then
         GST_SNK.Teams.Titan.set_player_info = function(ply)
+            Handle3Dmg(ply, false)
             ply:GodDisable()
-            --ply:SetModel( "models/olddeath/kyojin/kyojin.mdl" )
-            ply:SetPlayerColor(Vector(1, .2, .2))
+            ply:SetNoTarget(true)
         end
     end
 
     if (not GST_SNK.Teams.Primordial.set_player_info) then
         GST_SNK.Teams.Primordial.set_player_info = function(ply)
+            Handle3Dmg(ply, false)
             ply:GodDisable()
-            --ply:SetModel( "models/olddeath/kyojin/kyojin.mdl" )
-            ply:SetPlayerColor(Vector(1, .2, .2))
+            ply:SetNoTarget(true)
         end
     end
 
@@ -127,7 +167,7 @@ function GST_SNK:InitTeamStats()
         GST_SNK.Teams.NoTeam.set_player_info = function(ply)
             ply:SetHealth(100)
             ply:GodEnable()
-            ply:SetModel("models/crow.mdl")
+            ply:SetModel("models/hydralis/kaouet/civil_masculin/noble_masculin/noble_1/npc_civil_masculin_noble_1.mdl")
 
             if not ply:Alive() then
                 ply:Spawn()
@@ -153,7 +193,8 @@ end
 
 function GST_SNK:SwitchTeam(ply, newTeam, class)
     ply:ChatPrint("Nouvelle équipe (" .. newTeam.name .. ")")
-
+    
+    ply:SetNoTarget(false)
     if (ply:GetTeam() ~= newTeam) then
         ply:SetTeam(newTeam.id)
         ply:SetNWInt("Points", 0)

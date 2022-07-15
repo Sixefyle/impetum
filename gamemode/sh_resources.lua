@@ -82,9 +82,40 @@ GST_SNK.Images = {
 
 	["SKILL_HUMAN_ELDIEN_HEALER"] = base_image_path .. "skills/human/eldien/eldien_cap_healer.png",
 	["SKILL_HUMAN_ELDIEN_HEALER_BACK"] = base_image_path .. "skills/human/eldien/eldien_cap_healer_wb.png",
-
+	["SKILL_HUMAN_ELDIEN_SUPPLIER"] = base_image_path .. "skills/human/eldien/eldien_cap_supplier.png",
+	["SKILL_HUMAN_ELDIEN_SUPPLIER_BACK"] = base_image_path .. "skills/human/eldien/eldien_cap_supplier_wb.png",
 	["SKILL_HUMAN_ELDIEN_ARTILLERY"] = base_image_path .. "skills/human/eldien/eldien_cap_artillery.png",
 	["SKILL_HUMAN_ELDIEN_ARTILLERY_BACK"] = base_image_path .. "skills/human/eldien/eldien_cap_artillery_wb.png",
+	["SKILL_HUMAN_ELDIEN_ENGINEER"] = base_image_path .. "skills/human/eldien/eldien_cap_engineer.png",
+	["SKILL_HUMAN_ELDIEN_ENGINEER_BACK"] = base_image_path .. "skills/human/eldien/eldien_cap_engineer_wb.png",
+
+	["SKILL_PRIMORDIAL_BEAST_FIRST_SPELL"] = base_image_path .. "skills/titan/beast_titan/1.png",
+	["SKILL_PRIMORDIAL_BEAST_FIRST_SPELL_BACK"] = base_image_path .. "skills/titan/beast_titan/1_wb.png",
+	["SKILL_PRIMORDIAL_BEAST_SECOND_SPELL"] = base_image_path .. "skills/titan/beast_titan/2.png",
+	["SKILL_PRIMORDIAL_BEAST_SECOND_SPELL_BACK"] = base_image_path .. "skills/titan/beast_titan/2_wb.png",
+	["SKILL_PRIMORDIAL_BEAST_THIRD_SPELL"] = base_image_path .. "skills/titan/beast_titan/3.png",
+	["SKILL_PRIMORDIAL_BEAST_THIRD_SPELL_BACK"] = base_image_path .. "skills/titan/beast_titan/3_wb.png",
+
+	["SKILL_PRIMORDIAL_ARMORED_FIRST_SPELL"] = base_image_path .. "skills/titan/armored_titan/1.png",
+	["SKILL_PRIMORDIAL_ARMORED_FIRST_SPELL_BACK"] = base_image_path .. "skills/titan/armored_titan/1_wb.png",
+	["SKILL_PRIMORDIAL_ARMORED_SECOND_SPELL"] = base_image_path .. "skills/titan/armored_titan/2.png",
+	["SKILL_PRIMORDIAL_ARMORED_SECOND_SPELL_BACK"] = base_image_path .. "skills/titan/armored_titan/2_wb.png",
+	["SKILL_PRIMORDIAL_ARMORED_THIRD_SPELL"] = base_image_path .. "skills/titan/armored_titan/3.png",
+	["SKILL_PRIMORDIAL_ARMORED_THIRD_SPELL_BACK"] = base_image_path .. "skills/titan/armored_titan/3_wb.png",
+
+	["SKILL_PRIMORDIAL_FEMALE_FIRST_SPELL"] = base_image_path .. "skills/titan/female_titan/1.png",
+	["SKILL_PRIMORDIAL_FEMALE_FIRST_SPELL_BACK"] = base_image_path .. "skills/titan/female_titan/1_wb.png",
+	["SKILL_PRIMORDIAL_FEMALE_SECOND_SPELL"] = base_image_path .. "skills/titan/female_titan/2.png",
+	["SKILL_PRIMORDIAL_FEMALE_SECOND_SPELL_BACK"] = base_image_path .. "skills/titan/female_titan/2_wb.png",
+	["SKILL_PRIMORDIAL_FEMALE_THIRD_SPELL"] = base_image_path .. "skills/titan/female_titan/3.png",
+	["SKILL_PRIMORDIAL_FEMALE_THIRD_SPELL_BACK"] = base_image_path .. "skills/titan/female_titan/3_wb.png",
+	
+	["SKILL_PRIMORDIAL_ASAILLANT_FIRST_SPELL"] = base_image_path .. "skills/titan/asaillant_titan/1.png",
+	["SKILL_PRIMORDIAL_ASAILLANT_FIRST_SPELL_BACK"] = base_image_path .. "skills/titan/asaillant_titan/1_wb.png",
+	["SKILL_PRIMORDIAL_ASAILLANT_SECOND_SPELL"] = base_image_path .. "skills/titan/asaillant_titan/2.png",
+	["SKILL_PRIMORDIAL_ASAILLANT_SECOND_SPELL_BACK"] = base_image_path .. "skills/titan/asaillant_titan/2_wb.png",
+	["SKILL_PRIMORDIAL_ASAILLANT_THIRD_SPELL"] = base_image_path .. "skills/titan/asaillant_titan/3.png",
+	["SKILL_PRIMORDIAL_ASAILLANT_THIRD_SPELL_BACK"] = base_image_path .. "skills/titan/asaillant_titan/3_wb.png",
 
 	["PLAYER_HUD"] = base_image_path .. "hud/hud.png",
 	["PLAYER_HUD_GAZ"] = base_image_path .. "hud/gaz.png",

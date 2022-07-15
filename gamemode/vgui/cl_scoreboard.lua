@@ -146,8 +146,15 @@ function GM:GetScoreBoardPanel()
 		scroll_bar.btnGrip.Paint = function() end
 
 		local index = 1
+		local notCountedPlayer = 0
+		local playersAmount = #player.GetAll()
 		local back_player_panel
 		for ply, info in SortedPairsByMemberValue(self:GetPlayerScoreInfo(), LocalPlayer().scoreboardSortType, LocalPlayer().scoreboardAsc) do
+			if (not LocalPlayer():IsAdmin() and ply:GetTeam() == GST_SNK.Teams.NoTeam) then
+				notCountedPlayer = notCountedPlayer + 1
+				continue
+			end
+			playersAmount = playersAmount - notCountedPlayer
 
 			local teamColor
 			if (ply:Team() > 0) then
@@ -159,12 +166,12 @@ function GM:GetScoreBoardPanel()
 
 			local player_panel = vgui.Create("DPanel", self.player_list_panel)
 			player_panel:Dock(TOP)
-			player_panel:DockMargin(0, index == #player.GetAll() and 40 or 0, 0, 0)
+			player_panel:DockMargin(0, index == playersAmount and 40 or 0, 0, 0)
 			player_panel:SetHeight(60)
 			player_panel:SetBackgroundColor(Color(0,0,0,0))
 			player_panel:SetZPos(2)
 
-			if (index == #player.GetAll()) then
+			if (index == playersAmount) then
 				back_player_panel = vgui.Create("DImage", self.player_list_panel)
 				back_player_panel:SetImage(GST_SNK.Images.TAB_MENU_BACKGROUND_START)
 				back_player_panel:SetSize(self.scoreboard_base:GetSize() - 38, 100)
@@ -187,17 +194,24 @@ function GM:GetScoreBoardPanel()
 			player_class_panel_back = vgui.Create("DImage", player_class_panel)
 			player_class_panel_back:SetSize(player_class_panel:GetSize(), 47)
 
-			if (ply:Team() > 0) then
-				player_class_panel_back:SetImage(GST_SNK.Images["TAB_MENU_USER_" .. string.upper(GST_SNK:GetTeam(ply:Team()).name)])
+			if (ply:Team() > 0 and ply:Team() ~= 6) then
+				player_class_panel_back:SetImage(GST_SNK.Images["TAB_MENU_USER_" .. string.upper(ply:GetTeam().name)])
 			else
 				player_class_panel_back:SetImage(GST_SNK.Images.TAB_MENU_USER_ELDIEN)
+				player_class_panel_back:SetImageColor(Color(255,255,0, 100))
 			end
 
 			local player_ping = vgui.Create("DPanel", player_class_panel)
 			player_ping:Dock(LEFT)
 			player_ping:DockMargin(30, 0, 0, 0)
+
 			player_ping.Paint = function(panel, w, h)
-				draw.SimpleText(ply:Ping(), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				if (IsValid(ply)) then
+					draw.SimpleText(ply:Ping(), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				else
+					player_class_panel:Remove()
+					RefreshList()
+				end
 			end
 	
 			local player_name = vgui.Create("DPanel", player_class_panel)
@@ -205,28 +219,60 @@ function GM:GetScoreBoardPanel()
 			player_name:SetWidth(730)
 			player_name:DockMargin(50, 0, 0, 0)
 			player_name.Paint = function(panel, w, h)
-				draw.SimpleText(ply:Nick(), "gotham_24", 0, h / 2, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+				if (IsValid(ply)) then
+					draw.SimpleText(ply:Nick(), "gotham_24", 0, h / 2, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+				end
 			end
 	
 			local player_kills = vgui.Create("DPanel", player_class_panel)
 			player_kills:Dock(LEFT)
 			player_kills:DockMargin(40, 0, 0, 0)
 			player_kills.Paint = function(panel, w, h)
-				draw.SimpleText(ply:Frags(), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				if (IsValid(ply)) then
+					draw.SimpleText(ply:Frags(), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				end
 			end
 	
 			local player_deaths = vgui.Create("DPanel", player_class_panel)
 			player_deaths:Dock(LEFT)
 			player_deaths:DockMargin(75, 0, 0, 0)
 			player_deaths.Paint = function(panel, w, h)
-				draw.SimpleText(ply:Deaths(), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				if (IsValid(ply)) then
+					draw.SimpleText(ply:Deaths(), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				end
 			end
 	
 			local player_points = vgui.Create("DPanel", player_class_panel)
 			player_points:Dock(LEFT)
 			player_points:DockMargin(65, 0, 0, 0)
 			player_points.Paint = function(panel, w, h)
-				draw.SimpleText(ply:GetNWInt("Points"), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				if (IsValid(ply)) then
+					draw.SimpleText(ply:GetNWInt("Points"), "gotham_24", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				end
+			end
+
+			local player_class_button = vgui.Create("DButton", player_class_panel)
+			player_class_button:SetSize(player_class_panel:GetSize())
+			player_class_button:SetText("")
+
+			player_class_button.Paint = function(panel, w, h) end
+			player_class_button.DoRightClick = function()
+				local options = vgui.Create("DMenu", player_class_panel)
+				if (LocalPlayer():IsAdmin() and ply ~= LocalPlayer()) then
+					options:AddOption("Exclure", function()
+						RunConsoleCommand("ulx", "kick", ply:GetName(), "Vous avez été exclu par " .. LocalPlayer():GetName())
+					end):SetIcon("icon16/cross.png")
+	
+					local Child, Parent = options:AddSubMenu( "Bannir" )
+					Parent:SetIcon( "icon16/delete.png" )
+	
+					for _, time in pairs({999999, 365, 30, 14, 7, 3, 1}) do
+						Child:AddOption(time .. " jours", function()
+							RunConsoleCommand("ulx", "banid", ply:SteamID(), time * 1440, "Vous avez été banni par " .. LocalPlayer():GetName())
+						end):SetIcon("icon16/clock_stop.png")
+					end
+				end
+				options:Open()
 			end
 
 			index = index + 1
@@ -234,15 +280,6 @@ function GM:GetScoreBoardPanel()
 	end
 
 	RefreshList()
-
-	-- hide_button = vgui.Create("DButton", self.scoreboard_base)
-	-- hide_button:SetPos(0,0)
-	-- hide_button:SetSize(100,100)
-	-- hide_button:SetText("_")
-
-	-- hide_button.DoClick = function()
-	-- 	self.scoreboard_base:ToggleVisible()
-	-- end
 end
 
 function GM:ScoreboardShow()
