@@ -29,6 +29,7 @@ include("sv_map_config.lua")
 -- util.AddNetworkString("SavePlayerPref")
 util.AddNetworkString("ReceiveTeamPoints")
 util.AddNetworkString("ShowWinnerPanel")
+util.AddNetworkString("ReceiveServerClassInfo")
 
 local function SpawnFlags()
     if (GST_SNK.Maps[game.GetMap()].CaptureFlags and not table.IsEmpty(GST_SNK.Maps[game.GetMap()].CaptureFlags)) then
@@ -48,13 +49,19 @@ local function SpawnFlags()
 end
 
 function GM:SendCapturesPointsInfo(ply)
-    net.Start("ReceiveTeamsInfo")
+    net.Start("ReceiveServerClassInfo")
         net.WriteUInt(GAMEMODE.EldienPoints, 8)
         net.WriteUInt(GAMEMODE.MahrPoints, 8)
 
         for _, flag in pairs(GST_SNK.Maps[game.GetMap()].CaptureFlags) do
             net.WriteColor(flag.OwnerTeam and flag.OwnerTeam.color or Color(100,100,100,100))
         end
+    net.Send(ply)
+end
+
+function GM:SendServerClassInfo(ply)
+    net.Start("ReceiveServerClassInfo")
+        net.WriteTable(GST_SNK.Classes)
     net.Send(ply)
 end
 
@@ -169,6 +176,7 @@ function GM:PlayerInitialSpawn(ply)
         end
 
         self:SendCapturesPointsInfo(ply)
+        self:SendServerClassInfo(ply)
     end)
 
     ply.initialSpawn = true
@@ -186,6 +194,14 @@ util.AddNetworkString("UnMutePlayer")
 
 -- Ends Here
 function GM:PlayerSpawn(ply)
+    if (ply:GetCurrentClass() and ply:GetCurrentClass().isDisabled) then
+        ply:SetTeam(GST_SNK.Teams.NoTeam.id)
+        --ply:SetClass(nil)
+        ply:ChatPrint("Cette classe est désactivé !")
+        ply:ChatPrint("Veuillez prendre une autre classe")
+        ply:KillSilent()
+    end
+
     ply:SetArmor(100)
     local oldhands = ply:GetHands()
 
@@ -311,6 +327,10 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         end
         attacker:AddFrags(1)
     end
+end
+
+function GM:PlayerSilentDeath(ply)
+    ply.canGoInSafeZone = true
 end
 
 function GM:PlayerAuthed(ply, steamID, uniqueID)
@@ -459,6 +479,42 @@ concommand.Add("reset_teams_points", function()
     GAMEMODE.MahrPoints = 0
     GAMEMODE.gameEnded = false
     print("Points des équipes remis à 0 !")
+end)
+
+concommand.Add("disable", function(ply, cmd, args)
+    if (#args >= 2 and GST_SNK.Classes[args[1]][args[2]]) then -- TODO: changer cette fonction horrible
+        if (GST_SNK.Classes[args[1]][args[2]].isDisabled) then
+            GST_SNK.Classes[args[1]][args[2]].isDisabled = false
+        else
+            GST_SNK.Classes[args[1]][args[2]].isDisabled = true
+        end
+
+        net.Start("GetNewLockedClass")
+            net.WriteString(args[1])
+            net.WriteString(args[2])
+            net.WriteBool(GST_SNK.Classes[args[1]][args[2]].isDisabled)
+        net.Broadcast()
+
+        local text = "La classe " .. args[2] .. " de l'équipe " .. args[1] .. " est maintenant " .. (GST_SNK.Classes[args[1]][args[2]].isDisabled and "désactivé" or "activé")
+        if (IsValid(ply)) then
+            ply:ChatPrint(text)
+        end
+        print(text .. (IsValid(ply) and " - " .. ply:GetName() or ""))
+
+        if (args[3] and args[3] == "true") then
+            for _, currentPly in pairs(player.GetAll()) do
+                if (IsValid(currentPly) and
+                currentPly:Alive() and
+                currentPly:GetTeam() == GST_SNK.Teams[args[1]] and
+                currentPly:GetCurrentClass().id == GST_SNK.Classes[args[1]][args[2]].id) then
+
+                    currentPly:KillSilent()
+                    currentPly:ChatPrint("Cette classe est désactivé et doit être changé tout de suite.")
+                    currentPly:ChatPrint("Veuillez prendre une autre classe")
+                end
+            end
+        end
+    end
 end)
 
 --End Damage Modifiers

@@ -178,6 +178,11 @@ function GST_SNK:InitTeamStats()
 end
 
 function GST_SNK:RequestTeamSwitch(ply, newTeam, class)
+    if (class.isDisabled) then
+        ply:ChatPrint("Cette classe est désactivé et ne peut pas être utilisé pour le moment !")
+        return
+    end
+
     if (not ply:Alive() or ply.initialSpawn) then
         if (ply.initialSpawn) then
             ply.initialSpawn = false
@@ -192,8 +197,14 @@ function GST_SNK:RequestTeamSwitch(ply, newTeam, class)
 end
 
 function GST_SNK:SwitchTeam(ply, newTeam, class)
+    if (class and class.isDisabled) then
+        ply:ChatPrint("La classe que vous aviez choisit est désactivé !")
+        ply:ChatPrint("Veuillez choisir une autre classe.")
+        return
+    end
+
     ply:ChatPrint("Nouvelle équipe (" .. newTeam.name .. ")")
-    
+
     ply:SetNoTarget(false)
     if (ply:GetTeam() ~= newTeam) then
         ply:SetTeam(newTeam.id)

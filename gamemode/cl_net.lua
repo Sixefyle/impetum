@@ -32,6 +32,10 @@ net.Receive("ReceiveTeamsInfo", function()
     end
 end)
 
+net.Receive("ReceiveServerClassInfo", function()
+    GST_SNK.Classes = net.ReadTable()
+end)
+
 net.Receive("PlaySound", function()
     LocalPlayer():EmitSound(net.ReadString(), 75, 100, .3)
 end)

@@ -2,6 +2,7 @@ if (SERVER) then
     util.AddNetworkString("GetClassInfo")
     util.AddNetworkString("GetUnlockedClass")
     util.AddNetworkString("ClassBuyRequest")
+    util.AddNetworkString("GetNewLockedClass")
 end
 
 GST_SNK.Classes = {
@@ -500,6 +501,14 @@ end
 if (CLIENT) then
     net.Receive("GetClassInfo", function()
         LocalPlayer().class = net.ReadTable()
+    end)
+
+    net.Receive("GetNewLockedClass", function()
+        local teamName = net.ReadString()
+        local className = net.ReadString()
+        local isDisabled = net.ReadBool()
+
+        GST_SNK.Classes[teamName][className].isDisabled = isDisabled
     end)
 
     net.Receive("GetUnlockedClass", function()

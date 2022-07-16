@@ -130,7 +130,7 @@ function ply:RefreshHud()
 	player_hud_background:DockMargin(0, 0, 0, 50)
     player_hud_background:SetImage(GST_SNK.Images.PLAYER_HUD)
 
-	if (self:GetActiveWeapon():GetClass() == "gst_3dmg") then
+	if (IsValid(self:GetActiveWeapon()) and self:GetActiveWeapon():GetClass() == "gst_3dmg") then
 		local weap = self:GetActiveWeapon()
 		self.player_gaz_bar = vgui.Create("DPanel", self.player_hud)
 		self.player_gaz_bar:SetPos(50, 151)
@@ -166,7 +166,9 @@ function ply:RefreshHud()
 			local _, cooldown_panel_upper, cooldown_icon_upper = ShowSkillIcon(skill.Icon, skill.IconBack, input.GetKeyName(LocalPlayer().preference.skill_key[i]))
 
 			timer.Create("refreshCooldownHud" .. skill:GetClass(), .3, 0, function()
-				self:HudUpdateCooldown(cooldown_panel_upper, cooldown_icon_upper)
+				if (skill and skill.Icon) then
+					self:HudUpdateCooldown(cooldown_panel_upper, cooldown_icon_upper)
+				end
 			end)
 		else
 			local _, cooldown_panel_upper, cooldown_icon_upper =

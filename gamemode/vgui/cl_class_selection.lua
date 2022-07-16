@@ -168,6 +168,7 @@ function OpenClassMenu(newTeam)
     for id, class in SortedPairsByMemberValue(GST_SNK.Classes[newTeam], "id") do
 
         local isLocked = not LocalPlayer().unlocked_classes[newTeam] or not table.HasValue(LocalPlayer().unlocked_classes[newTeam], id)
+        local isDisabled = class.isDisabled
 
         if (index % 2 == 0) then
             base_class_panel = vgui.Create("DPanel", base_panel)
@@ -201,7 +202,7 @@ function OpenClassMenu(newTeam)
         class_title_border = vgui.Create("DImage", class_title)
         class_title_border:Dock(FILL)
         class_title_border:SetImage(GST_SNK.Images.CLASS_SELECTION_BAR_TITLE)
-        if(isLocked) then
+        if(isLocked or isDisabled) then
             class_title_border:SetImageColor(Color(153,153,153))
         end
 
@@ -210,7 +211,7 @@ function OpenClassMenu(newTeam)
         class_title_text:SetText("")
 
         local title_color = Color(255,255,255)
-        if(isLocked) then
+        if(isLocked or isDisabled) then
             title_color = Color(200,200,200)
         end
         class_title_text.Paint = function(self, w, h)
@@ -247,7 +248,7 @@ function OpenClassMenu(newTeam)
         class_bar:DockMargin(0, 0, 0, 0)
         class_bar:SetZPos(2)
 
-        if(isLocked) then
+        if(isLocked or isDisabled) then
             class_bar:SetImageColor(Color(153,153,153))
         end
 
@@ -263,7 +264,9 @@ function OpenClassMenu(newTeam)
         class_button.Paint = function(self, w, h)
             GST_SNK.Utils:HUDPlaySound(self, "button/hover.wav")
 
-            if (isLocked ) then
+            if (isDisabled) then
+                surface.SetDrawColor(Color(145,40,40))
+            elseif (isLocked) then
                 if (self:IsHovered())then
                     surface.SetDrawColor(Color(233,200,37))
                 else
@@ -276,7 +279,9 @@ function OpenClassMenu(newTeam)
             end
             surface.DrawRect(0, 0, w, h)
 
-            if (isLocked) then
+            if (isDisabled) then
+                draw.SimpleText("Indisponible", "default_snk_small", 62, 25, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            elseif (isLocked) then
                 draw.SimpleText("Acheter", "default_snk_small", 62, 25, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
             else
                 draw.SimpleText("Rejoindre", "default_snk_small", 62, 25, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
@@ -284,6 +289,8 @@ function OpenClassMenu(newTeam)
         end
 
         class_button.DoClick = function()
+            if(isDisabled) then return end
+
             if (not isLocked) then
                 net.Start("TeamSelect")
                     net.WriteString(newTeam)
@@ -308,7 +315,7 @@ function OpenClassMenu(newTeam)
         test_blur:SetSize(class_desc_text:GetSize())
         test_blur:SetZPos(4)
         test_blur.Paint = function(self, w, h)
-            if (isLocked and not self:IsHovered()) then
+            if ((isLocked or isDisabled) and not self:IsHovered()) then
                 blur(self)
                 draw.SimpleText("VERROUILLE", "default_snk_small",  w / 2, h / 2 - 15, Color(255,255,255,189), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
                 draw.SimpleText("(Passez votre souris pour découvrir)", "gotham",  w / 2, h / 2 + 5  , Color(255,255,255,189), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
