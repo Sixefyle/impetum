@@ -202,7 +202,6 @@ function SWEP:ThrowGrappinToPos(loc1, loc2, shouldRefresh)
 
     if loc1 then
         GST_SNK.Utils:PlaySoundToPlayer(SHOOT_SOUND, self:GetOwner())
-        self:EmitSound(SHOOT_SOUND, 75, 100, .3)
         self.rope1 = ents.Create("rope")
         self.rope1:SetDestination(loc1)
         self.rope1:SetParent(self)
@@ -214,7 +213,6 @@ function SWEP:ThrowGrappinToPos(loc1, loc2, shouldRefresh)
 
     if loc2 then
         GST_SNK.Utils:PlaySoundToPlayer(SHOOT_SOUND, self:GetOwner())
-        self:EmitSound(SHOOT_SOUND, 75, 100, .3)
         self.rope2 = ents.Create("rope")
         self.rope2:SetDestination(loc2)
         self.rope2:SetParent(self)
@@ -223,6 +221,8 @@ function SWEP:ThrowGrappinToPos(loc1, loc2, shouldRefresh)
         self.rope2:Spawn()
         self:SetNWEntity("rope2", self.rope2)
     end
+
+    self:GetOwner():EmitSound(SHOOT_SOUND, 75, 100, .3)
 end
 
 hook.Add("PlayerButtonUp", "3DMG:OnReleaseGrapping", function(ply, button)
