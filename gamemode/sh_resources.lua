@@ -126,6 +126,37 @@ GST_SNK.Images = {
 	["WINNER_HUD_MAHR"] = base_image_path .. "hud/endscreen_mahr.png",
 }
 
+GST_SNK.Sounds = {
+	HIT_SWORD = {
+		"gst/hit1.wav",
+		"gst/hit2.wav",
+		"gst/hit3.wav"
+	},
+	HIT_GENERAL = "gst/hit_marker.wav",
+	KILL = "gst/kill_sound_effect.wav",
+	TRI_DIM = {
+		Start = "gst/3dmg_wire.wav",
+		Smoke = "gst/3dmg_smoke.wav"
+	},
+	WIN_GAME = {
+		"gst/win1.wav",
+		"gst/win2.wav",
+		"gst/win3.wav"
+	},
+	LOSE_GAME = {
+		"gst/lose1.wav",
+		"gst/lose2.wav",
+		"gst/lose3.wav"
+	},
+	MUSKET_SHOOT = {
+		"gst/musket_shoot1.wav",
+		"gst/musket_shoot2.wav",
+		"gst/musket_shoot3.wav"
+	},
+	BUY = "gst/buying.wav",
+	CAPTURE_POINT = "gst/capture.wav"
+}
+
 if CLIENT then
 	GST_SNK.Fonts = {
 		["DEFAULT"] = "Rise Of Kingdom",
@@ -135,7 +166,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk_xl", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 64,
+		size = (ScrW() / 1920) * 64,
 		weight = 500,
 		antialias = true,
 	} )
@@ -143,7 +174,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 48,
+		size = (ScrW() / 1920) * 48,
 		weight = 500,
 		antialias = true,
 
@@ -152,7 +183,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk_large", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 36,
+		size = (ScrW() / 1920) * 36,
 		weight = 500,
 		antialias = true,
 	} )
@@ -160,7 +191,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk_normal", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 24,
+		size = (ScrW() / 1920) * 24,
 		weight = 500,
 		antialias = true,
 	} )
@@ -168,7 +199,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk_small", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 19,
+		size = (ScrW() / 1920) * 19,
 		weight = 500,
 		antialias = true,
 	} )
@@ -177,7 +208,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk_very_small", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 17,
+		size =  (ScrW() / 1920) * 17,
 		weight = 500,
 		antialias = true,
 	} )
@@ -185,7 +216,7 @@ if CLIENT then
 	surface.CreateFont( "default_snk_15", {
 		font = GST_SNK.Fonts.DEFAULT,
 		extended = false,
-		size = 15,
+		size = (ScrW() / 1920) * 15,
 		weight = 500,
 		antialias = true,
 	} )
@@ -193,7 +224,7 @@ if CLIENT then
 	surface.CreateFont( "gotham", {
 		font = GST_SNK.Fonts.GOTHAM,
 		extended = false,
-		size = 17,
+		size = (ScrW() / 1920) * 17,
 		weight = 500,
 		antialias = true,
 	} )
@@ -202,7 +233,7 @@ if CLIENT then
 	surface.CreateFont( "gotham_19", {
 		font = GST_SNK.Fonts.GOTHAM,
 		extended = false,
-		size = 19,
+		size = (ScrW() / 1920) * 19,
 		weight = 500,
 		antialias = true,
 	} )
@@ -210,7 +241,7 @@ if CLIENT then
 	surface.CreateFont( "gotham_24", {
 		font = GST_SNK.Fonts.GOTHAM,
 		extended = false,
-		size = 24,
+		size = (ScrW() / 1920) * 24,
 		weight = 500,
 		antialias = true,
 	} )
