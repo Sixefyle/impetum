@@ -1,20 +1,9 @@
-
-local size = 100
-local HeaderPoly = {
-    {x = 20, y = 0},
-    {x = 200, y = 0},
-    {x = 200, y = 15},
-    {x = 190, y = 30},
-    {x = 10, y = 30},
-    {x = 10, y = 15},
-}
-
 function OpenClassMenu(newTeam)
     local teamColor = GST_SNK.Teams[newTeam].color
     teamColor.a = 255
 
     local base_panel = vgui.Create("DPanel")
-    base_panel:SetSize(1820, 980)
+    base_panel:SetSize(ScrW() - ScrW() * .05, ScrH() - ScrH() * .1)
     base_panel:MakePopup()
     base_panel:Center()
     base_panel:SetBackgroundColor(Color(0,0,0,0))
@@ -31,14 +20,14 @@ function OpenClassMenu(newTeam)
 
     panel_title = vgui.Create("DPanel", base_panel)
     panel_title:Dock(TOP)
-    panel_title:SetHeight(180)
+    panel_title:SetHeight(ScrH() * .2)
     panel_title:SetBackgroundColor(Color(0,0,0,0))
 
     -- BACK BUTTON
 
     back_button = vgui.Create("DButton", panel_title)
-    back_button:SetPos(ScrW() * .29, 78)
-    back_button:SetSize(200,80)
+    back_button:SetPos(ScrW() * .29, ScrH() * .073)
+    back_button:SetSize(base_panel:GetWide() * .1, ScrH() * .07)
     back_button:SetText("")
 
     back_button.Paint = function(self, w, h)
@@ -53,7 +42,7 @@ function OpenClassMenu(newTeam)
 
     back_button_background = vgui.Create("DImage", back_button)
     back_button_background:Dock(FILL)
-    back_button_background:DockMargin(0,27,0,15)
+    back_button_background:DockMargin(0, ScrH() * .025, 0, ScrH() * .013)
     back_button_background:SetImage(GST_SNK.Images.BUTTON_BACKGROUND_2)
     back_button_background:SetImageColor(Color(100,100,100))
 
@@ -70,41 +59,12 @@ function OpenClassMenu(newTeam)
         draw.SimpleText("Retour", "default_snk_normal", w / 2, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
 
-
-
-
-    -- back_button_background = vgui.Create("DImage", back_button)
-    -- back_button_background:Dock(FILL)
-    -- back_button_background:SetImage(GST_SNK.Images.BUTTON_2)
-
-    -- back_button_text = vgui.Create("DLabel", back_button_background)
-    -- back_button_text:Dock(FILL)
-    -- back_button_text:SetText("")
-
-
-
-    -- GST COIN AMOUNT
-
     gst_coins_amount = vgui.Create("DLabel", panel_title)
-    gst_coins_amount:SetPos(ScrW() - 500, 82)
-    gst_coins_amount:SetSize(300, 80)
+    gst_coins_amount:SetPos(base_panel:GetWide() * .8, ScrH() * .073)
+    gst_coins_amount:SetSize(base_panel:GetWide() * .15, ScrH() * .07)
     gst_coins_amount:SetText("")
 
-    gst_coins_amount.Paint = function(self, w, h)
-        -- surface.SetDrawColor(teamColor)
-        -- draw.NoTexture()
-
-        -- surface.SetFont("default_snk_normal")
-        -- local title = "• " .. string.Comma(LocalPlayer():SH_GetPremiumPoints()) .. " GST Coins"
-        -- size = surface.GetTextSize(title)
-
-        -- gst_coins_panel[2].x = size + 40
-        -- gst_coins_panel[3].x = size + 40
-        -- gst_coins_panel[4].x = size + 20
-
-        -- surface.DrawPoly(gst_coins_panel)
-        -- draw.SimpleText(title, "default_snk_normal", 15, h / 2, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-    end
+    gst_coins_amount.Paint = function(self, w, h)    end
     
     gst_coins_background = vgui.Create("DImage", gst_coins_amount)
     gst_coins_background:Dock(FILL)
@@ -122,25 +82,11 @@ function OpenClassMenu(newTeam)
     -- STANDARD COIN AMOUNT
 
     standard_coins_amount = vgui.Create("DLabel", panel_title)
-    standard_coins_amount:SetPos(ScrW() - 820, 82)
-    standard_coins_amount:SetSize(300, 80)
+    standard_coins_amount:SetPos(base_panel:GetWide() * .63, ScrH() * .073)
+    standard_coins_amount:SetSize(base_panel:GetWide() * .15, ScrH() * .07)
     standard_coins_amount:SetText("")
 
-    standard_coins_amount.Paint = function(self, w, h)
-        -- surface.SetDrawColor(Color(0,0,0))
-        -- draw.NoTexture()
-
-        -- surface.SetFont("default_snk_normal")
-        -- local title = "• " .. string.Comma(LocalPlayer():SH_GetStandardPoints()) .. " Coins"
-        -- size = surface.GetTextSize(title)
-
-        -- gst_coins_panel[2].x = size + 40
-        -- gst_coins_panel[3].x = size + 40
-        -- gst_coins_panel[4].x = size + 20
-
-        -- surface.DrawPoly(gst_coins_panel)
-        -- draw.SimpleText(title, "default_snk_normal", 15, h / 2, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-    end
+    standard_coins_amount.Paint = function(self, w, h)    end
 
     standard_coins_background = vgui.Create("DImage", standard_coins_amount)
     standard_coins_background:Dock(FILL)
@@ -162,8 +108,8 @@ function OpenClassMenu(newTeam)
     base_class_panel_right = vgui.Create("DPanel", base_panel)
     base_class_panel_right:Dock(RIGHT)
     base_class_panel_right:SetBackgroundColor(Color(0,0,0,0))
-    base_class_panel_right:SetWidth((ScrW() / 2) - 80)
-    base_class_panel_right:DockMargin(0,0,60,0)
+    base_class_panel_right:SetWidth(base_panel:GetWide() / 2 - base_panel:GetWide() * .017)
+    base_class_panel_right:DockMargin(0,0,base_panel:GetWide() * .035,0)
 
     for id, class in SortedPairsByMemberValue(GST_SNK.Classes[newTeam], "id") do
 
@@ -176,14 +122,14 @@ function OpenClassMenu(newTeam)
             base_class_panel = vgui.Create("DPanel", base_class_panel_right)
         end
 
-        base_class_panel:SetHeight(105)
+        base_class_panel:SetHeight(ScrH() * .1)
         base_class_panel:Dock(TOP)
         base_class_panel:SetBackgroundColor(Color(0,0,0,0))
-        base_class_panel:DockMargin(50, 0, 0, 5)
+        base_class_panel:DockMargin(base_panel:GetWide() * .027, 0, 0, 5)
 
         class_icon = vgui.Create("DPanel", base_class_panel)
         class_icon:Dock(LEFT)
-        class_icon:SetWidth(100)
+        class_icon:SetWidth(base_panel:GetWide() * .055)
         class_icon:SetBackgroundColor(Color(0,0,0,0))
 
         if (class.icon) then
@@ -194,8 +140,8 @@ function OpenClassMenu(newTeam)
 
         class_title = vgui.Create("DPanel", base_class_panel)
         --class_title:Dock(TOP)
-        class_title:SetPos(150,0)
-        class_title:SetSize(200,50)
+        class_title:SetPos(base_panel:GetWide() * .09,0)
+        class_title:SetSize(base_panel:GetWide() * .11, ScrH() * .05)
         class_title:SetBackgroundColor(Color(0,0,0,0))
         class_title:SetZPos(3)
 
@@ -218,45 +164,26 @@ function OpenClassMenu(newTeam)
             draw.DrawText(class.display_name, "default_snk_small", w / 2, h / 2 - 10, title_color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         end
 
-        -- class_title.Paint = function(self, w, h)
-        --     surface.SetDrawColor(Color(20,20,20))
-        --     --surface.DrawRect(10, 5, 200, 30)
-        --     draw.NoTexture()
-
-        --     surface.SetFont("default_snk_small")
-        --     local title = "• " .. name .. " •"
-        --     size = surface.GetTextSize(title)
-
-        --     HeaderPoly[2].x = size + 40
-        --     HeaderPoly[3].x = size + 40
-        --     HeaderPoly[4].x = size + 30
-
-        --     surface.DrawPoly( HeaderPoly )
-        --     draw.DrawText(title, "default_snk_small", 20, 10, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-        -- end
-
         class_desc_panel = vgui.Create("DPanel", base_class_panel)
         class_desc_panel:Dock(TOP)
-        class_desc_panel:SetHeight(60)
-        class_desc_panel:DockMargin(10, 40, 10, 0)
+        class_desc_panel:SetHeight(ScrH() * .05)
+        class_desc_panel:DockMargin(base_panel:GetWide() * .005, ScrH() * .04, base_panel:GetWide() * .007, 0)
         class_desc_panel:SetBackgroundColor(Color(0, 0, 0, 0))
         class_desc_panel:SetZPos(2)
 
         class_bar = vgui.Create("DImage", class_desc_panel)
         class_bar:Dock(FILL)
         class_bar:SetImage(GST_SNK.Images.CLASS_SELECTION_BAR)
-        class_bar:DockMargin(0, 0, 0, 0)
         class_bar:SetZPos(2)
 
         if(isLocked or isDisabled) then
             class_bar:SetImageColor(Color(153,153,153))
         end
 
+
         class_button = vgui.Create("DButton", class_desc_panel)
-        -- class_button:DockMargin(5,0,0,0)
-        -- class_button:Dock(RIGHT)
-        class_button:SetPos(585, 3)
-        class_button:SetSize(150, 100)
+        class_button:SetPos(base_panel:GetWide() * .315, -ScrH() * .005)
+        class_button:SetSize(base_panel:GetWide() * .1, ScrH() * .1)
         class_button:SetColor(Color(0,0,0))
         class_button:SetText("")
         class_button:SetZPos(1)
@@ -267,7 +194,7 @@ function OpenClassMenu(newTeam)
             if (isDisabled) then
                 surface.SetDrawColor(Color(145,40,40))
             elseif (isLocked) then
-                if (self:IsHovered())then
+                if (self:IsHovered()) then
                     surface.SetDrawColor(Color(233,200,37))
                 else
                     surface.SetDrawColor(Color(199,172,38))
@@ -280,11 +207,11 @@ function OpenClassMenu(newTeam)
             surface.DrawRect(0, 0, w, h)
 
             if (isDisabled) then
-                draw.SimpleText("Indisponible", "default_snk_small", 62, 25, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+                draw.SimpleText("Indisponible", "default_snk_small", w / 2 - w * .08, h * .3, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
             elseif (isLocked) then
-                draw.SimpleText("Acheter", "default_snk_small", 62, 25, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+                draw.SimpleText("Acheter", "default_snk_small", w / 2 - w * .08, h * .3, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
             else
-                draw.SimpleText("Rejoindre", "default_snk_small", 62, 25, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+                draw.SimpleText("Rejoindre", "default_snk_small", w / 2 - w * .08, h * .3, Color(255,255,255,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
             end
         end
 
@@ -303,15 +230,15 @@ function OpenClassMenu(newTeam)
         end
 
         class_desc_text = vgui.Create("DLabel", class_desc_panel)
-        class_desc_text:SetPos(50,-5)
-        class_desc_text:SetSize(540, 75)
+        class_desc_text:SetPos(base_panel:GetWide() * .025, -ScrH() * 0.01)
+        class_desc_text:SetSize(base_panel:GetWide() * .3, ScrH() * .07)
         class_desc_text:SetFont("gotham")
         class_desc_text:SetText(class.description and class.description or "Aucune description fournie.")
         class_desc_text:SetWrap(true)
         class_desc_text:SetZPos(3)
 
         test_blur = vgui.Create("DPanel", class_desc_panel)
-        test_blur:SetPos(45,0)
+        test_blur:SetPos(base_panel:GetWide() * .015,0)
         test_blur:SetSize(class_desc_text:GetSize())
         test_blur:SetZPos(4)
         test_blur.Paint = function(self, w, h)
