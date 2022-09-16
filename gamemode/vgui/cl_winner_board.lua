@@ -1,4 +1,4 @@
-net.Receive("ShowWinnerPanel", function()
+net.Receive("AOTA:TC:ShowWinnerPanel", function()
     local winnerTeamId = net.ReadUInt(2)
     local bestPlayers = net.ReadTable()
 
@@ -11,9 +11,9 @@ function ShowWinnerBoard(winner, bestPlayers)
     end
 
     if (LocalPlayer():GetTeam() == winner) then
-        surface.PlaySound("music/sound_victory.mp3")
+        surface.PlaySound(table.Random(GST_SNK.Sounds.WIN_GAME)) -- "music/sound_victory.mp3")
     else
-        surface.PlaySound("music/sound_defeat.mp3")
+        surface.PlaySound(table.Random(GST_SNK.Sounds.LOSE_GAME)) -- "music/sound_defeat.mp3")
     end
 
     LocalPlayer().winner_hud_base = vgui.Create("DPanel")
@@ -50,7 +50,7 @@ function ShowWinnerBoard(winner, bestPlayers)
     player_score:SetPos(0, 150)
     player_score:SetFont("default_snk_normal")
     player_score:SetColor(Color(221,218,22))
-    player_score:SetText("+" .. LocalPlayer():GetNWInt("Points") .. " Points standards")
+    player_score:SetText("+" .. LocalPlayer():GetNWInt("Points") .. " Coins")
     player_score:SetSize(player_score:GetTextSize())
     player_score:CenterHorizontal()
 
@@ -62,9 +62,9 @@ function ShowWinnerBoard(winner, bestPlayers)
     teams_score:CenterHorizontal()
 
     teams_score.Paint = function(panel, w, h)
-        draw.SimpleText(eldienScore, "default_snk_xl", 115, h / 2, eldienScore >= GAMEMODE.PointsToWin and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+        draw.SimpleText(eldienScore, "default_snk_xl", 115, h / 2, eldienScore >= mahrScore and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
         draw.SimpleText(" - ", "default_snk_xl",  w / 2 - 15, h / 2, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        draw.SimpleText(mahrScore, "default_snk_xl", 155, h / 2, mahrScore >= GAMEMODE.PointsToWin and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        draw.SimpleText(mahrScore, "default_snk_xl", 155, h / 2, mahrScore >= eldienScore and Color(36,241,28) or Color(197,58,58), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
     end
 
     local winner_image = vgui.Create("DImage", LocalPlayer().winner_hud_base)
@@ -72,15 +72,18 @@ function ShowWinnerBoard(winner, bestPlayers)
     winner_image:DockMargin(200, 40, 200, 500)
     winner_image:SetImage(GST_SNK.Images["WINNER_HUD_" .. string.upper(winner.name)])
 
-    local best_player_title = vgui.Create("DPanel", LocalPlayer().winner_hud_base)
-    best_player_title:SetPos(0, 550)
-    best_player_title:SetSize(400, 200)
-    best_player_title:CenterHorizontal()
-    best_player_title:SetAlpha(0)
-
-    best_player_title.Paint = function(self, w, h)
-        draw.SimpleText(bestPlayers[1].name, "default_snk", w / 2, h / 2, Color(255,215,0), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        draw.SimpleText(string.Comma(bestPlayers[1].points) .. " Points", "default_snk_large", w / 2, h / 2 + 60, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    local best_player_title
+    if (bestPlayers[1]) then
+        best_player_title = vgui.Create("DPanel", LocalPlayer().winner_hud_base)
+        best_player_title:SetPos(0, 550)
+        best_player_title:SetSize(400, 200)
+        best_player_title:CenterHorizontal()
+        best_player_title:SetAlpha(0)
+    
+        best_player_title.Paint = function(self, w, h)
+            draw.SimpleText(bestPlayers[1].name, "default_snk", w / 2, h / 2, Color(255,215,0), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            draw.SimpleText(string.Comma(bestPlayers[1].points) .. " Points", "default_snk_large", w / 2, h / 2 + 60, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        end
     end
 
     local second_player_title
@@ -112,10 +115,12 @@ function ShowWinnerBoard(winner, bestPlayers)
 
     timer.Simple(2, function()
         local fraction = 0
-        timer.Create("bestAlpha", 0, 50, function()
-            best_player_title:SetAlpha(math.ease.InQuart(fraction) * 255)
-            fraction = fraction + .2
-        end)
+        if (best_player_title) then
+            timer.Create("bestAlpha", 0, 50, function()
+                best_player_title:SetAlpha(math.ease.InQuart(fraction) * 255)
+                fraction = fraction + .2
+            end)
+        end
 
         if (second_player_title) then
             timer.Simple(2, function()

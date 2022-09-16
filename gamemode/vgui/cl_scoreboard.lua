@@ -258,15 +258,25 @@ function GM:GetScoreBoardPanel()
 			player_class_button.Paint = function(panel, w, h) end
 			player_class_button.DoRightClick = function()
 				local options = vgui.Create("DMenu", player_class_panel)
+
+				local isMuted = ply:IsMuted()
+				options:AddOption(isMuted and "Démuter" or "Mettre en sourdine", function()
+					ply:SetMuted(not isMuted)
+					LocalPlayer():ChatPrint(ply:Nick() .. " est désormais " .. (isMuted and "démuté" or "en sourdine") .. "!")
+				end):SetIcon(isMuted and "icon16/sound_none.png" or "icon16/sound_mute.png")
+
 				if (LocalPlayer():IsAdmin() and ply ~= LocalPlayer()) then
-					options:AddOption("Exclure", function()
+					local modSubMenuChild, optionsMenu = options:AddSubMenu( "Modération" )
+					optionsMenu:SetIcon("icon16/award_star_gold_1.png")
+
+					modSubMenuChild:AddOption("Exclure", function()
 						RunConsoleCommand("ulx", "kick", ply:GetName(), "Vous avez été exclu par " .. LocalPlayer():GetName())
 					end):SetIcon("icon16/cross.png")
 	
-					local Child, Parent = options:AddSubMenu( "Bannir" )
+					local Child, Parent = modSubMenuChild:AddSubMenu( "Bannir" )
 					Parent:SetIcon( "icon16/delete.png" )
 	
-					for _, time in pairs({999999, 365, 30, 14, 7, 3, 1}) do
+					for _, time in pairs({1,3,7,14,30,365,99999}) do
 						Child:AddOption(time .. " jours", function()
 							RunConsoleCommand("ulx", "banid", ply:SteamID(), time * 1440, "Vous avez été banni par " .. LocalPlayer():GetName())
 						end):SetIcon("icon16/clock_stop.png")
@@ -287,15 +297,3 @@ function GM:ScoreboardShow()
     gui.EnableScreenClicker(true)
 	self:GetScoreBoardPanel()
 end
-
-net.Receive("MutePlayer", function(length)
-    local ply = net.ReadEntity()
-    ply:SetMuted(true)
-    LocalPlayer():ChatPrint(ply:GetName() .. " has been muted.")
-end)
-
-net.Receive("UnMutePlayer", function(length)
-    local ply = net.ReadEntity()
-    ply:SetMuted(false)
-    LocalPlayer():ChatPrint(ply:GetName() .. " has been unmuted.")
-end)

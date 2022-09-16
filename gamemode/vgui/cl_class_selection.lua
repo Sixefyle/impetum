@@ -113,7 +113,7 @@ function OpenClassMenu(newTeam)
 
     for id, class in SortedPairsByMemberValue(GST_SNK.Classes[newTeam], "id") do
 
-        local isLocked = not LocalPlayer().unlocked_classes[newTeam] or not table.HasValue(LocalPlayer().unlocked_classes[newTeam], id)
+        local isLocked = not LocalPlayer().classes[newTeam] or not LocalPlayer().classes[newTeam][id]
         local isDisabled = class.isDisabled
 
         if (index % 2 == 0) then
@@ -216,10 +216,10 @@ function OpenClassMenu(newTeam)
         end
 
         class_button.DoClick = function()
-            if(isDisabled) then return end
+            if (isDisabled) then return end
 
             if (not isLocked) then
-                net.Start("TeamSelect")
+                net.Start("AOTA:TS:TeamSelect")
                     net.WriteString(newTeam)
                     net.WriteString(id)
                 net.SendToServer()
@@ -344,7 +344,7 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     
 
     std_buy_button.DoClick = function()
-        net.Start("ClassBuyRequest")
+        net.Start("AOTA:TS:ClassBuyRequest")
             net.WriteBit(0)
             net.WriteString(id)
             net.WriteString(newTeam)
@@ -394,7 +394,7 @@ function OpenBuyModal(parent_panel, class, id, newTeam)
     end
 
     gst_buy_button.DoClick = function()
-        net.Start("ClassBuyRequest")
+        net.Start("AOTA:TS:ClassBuyRequest")
             net.WriteBit(1)
             net.WriteString(id)
             net.WriteString(newTeam)

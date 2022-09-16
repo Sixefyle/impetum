@@ -21,11 +21,11 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 SWEP.NextReload = 0
-SWEP.TitanModel = "models/gst/Cuirasse.mdl"
+SWEP.TitanModel = "models/gst/titan_cuirasse.mdl"
 
-SWEP.BaseHeight = 7.5
+SWEP.BaseHeight = 16
 SWEP.HumanBaseHeight = 1.8
-SWEP.BaseCameraOffset = 128
+SWEP.BaseCameraOffset = 64
 SWEP.AttackSpeed = 1
 SWEP.SpeedIncrease = 1.4
 
@@ -33,13 +33,13 @@ function SWEP:Initialize()
     self.Skills = {
         [1] = {
             ["Name"] = "test1",
-            ["Cooldown"] = 5,
+            ["Cooldown"] = 2,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_ARMORED_THIRD_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_ARMORED_THIRD_SPELL_BACK,
         },
         [2] = {
             ["Name"] = "test2",
-            ["Cooldown"] = 5,
+            ["Cooldown"] = 2,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_ARMORED_SECOND_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_ARMORED_SECOND_SPELL_BACK,
         },
@@ -200,7 +200,7 @@ end
 
 hook.Add("PlayerTick", "setupChargeMove", function(ply, moveData)
     if (ply:GetNWString("doAnimation") == "charge") then
-        local aimvector = ply:GetAimVector() * 1200
+        local aimvector = ply:GetAimVector() * 2400
         moveData:SetVelocity(Vector(aimvector.x, aimvector.y, moveData:GetVelocity().z - 200))
     end
 end)

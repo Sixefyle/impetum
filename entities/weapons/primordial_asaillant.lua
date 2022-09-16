@@ -21,7 +21,7 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 SWEP.NextReload = 0
-SWEP.TitanModel = "models/gst/Assaillant.mdl"
+SWEP.TitanModel = "models/gst/titan_assaillant.mdl"
 
 SWEP.BaseHeight = 16
 SWEP.HumanBaseHeight = 1.8
@@ -33,13 +33,13 @@ function SWEP:Initialize()
     self.Skills = {
         [1] = {
             ["Name"] = "test1",
-            ["Cooldown"] = 5,
+            ["Cooldown"] = 2,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_ASAILLANT_FIRST_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_ASAILLANT_FIRST_SPELL_BACK,
         },
         [2] = {
             ["Name"] = "test2",
-            ["Cooldown"] = 10,
+            ["Cooldown"] = 2,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_ASAILLANT_SECOND_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_ASAILLANT_SECOND_SPELL_BACK,
         },
@@ -55,19 +55,27 @@ end
 
 function SWEP:FirstSpell()
     GST_SNK.Utils:RunAnimation("roar", self:GetOwner(), true)
+    GST_SNK.Utils:PlaySoundToAllPlayer("gst/titan/scream_asaillant.wav")
 
-    for _, ent in pairs(ents.FindInSphere(self:GetOwner():GetPos(), 300)) do
-        --if (IsValid(ent) and ent:IsPlayer() and ent:Alive()) then
-            local physEnt = ent:GetPhysicsObject()
-            if (IsValid(physEnt)) then
-                local vec = ent:GetPos() - self:GetOwner():GetPos()
-                vec:Normalize()
-                vec = vec * 400
-                vec[3] = 400
-                physEnt:SetVelocity(vec)
+    timer.Simple(1, function()
+        for _, ent in pairs(ents.FindInSphere(self:GetOwner():GetPos() + Vector(0,0,200), 700)) do
+            if (IsValid(ent) and ent:IsPlayer() and ent:Alive() and self:GetOwner() ~= ent) then
+                local physEnt = ent:GetPhysicsObject()
+                if (IsValid(physEnt) or ent:IsPlayer()) then
+                    local vec = ent:GetPos() - self:GetOwner():GetPos()
+                    vec:Normalize()
+                    vec = vec * 4000
+                    vec[3] = 800
+    
+                    if not ent:IsPlayer() then
+                        physEnt:SetVelocity(vec)
+                    else
+                        ent:SetVelocity(vec)
+                    end
+                end
             end
-        --end
-    end
+        end
+    end)
 end
 
 function SWEP:SecondSpell()
@@ -82,108 +90,115 @@ function SWEP:SecondSpell()
 
     local entToEat = tr.Entity
     if (IsValid(entToEat)) then
-        entToEat:Remove()
+        entToEat:TakeDamage(99999, self:GetOwner(), self)
         owner:SetHealth(owner:GetMaxHealth())
     end
 end
 
 function SWEP:ThirdSpell()
-    local owner = self:GetOwner()
-    local oldWalkSpeed = owner:GetWalkSpeed()
-    local oldRunSpeed = owner:GetRunSpeed()
+    GST_SNK.Utils:RunAnimation("roar", self:GetOwner(), true)
 
-    owner:SetColor(Color(160,31,31))
-    owner:SetWalkSpeed(oldWalkSpeed * 1.4)
-    owner:SetRunSpeed(oldRunSpeed * 1.4)
-    owner:SetNWInt("IsBerserk", 1)
+    timer.Simple(1, function()
+        local owner = self:GetOwner()
+        local oldWalkSpeed = owner:GetWalkSpeed()
+        local oldRunSpeed = owner:GetRunSpeed()
 
-    owner:SetHealth(owner:GetMaxHealth() * 1.3)
+        owner:SetSkin(1)
+        owner:SetWalkSpeed(oldWalkSpeed * 1.4)
+        owner:SetRunSpeed(oldRunSpeed * 1.4)
+        owner:SetNWInt("IsBerserk", 1)
 
-    timer.Simple(5, function()
-        owner:SetColor(Color(32,102,233))
-        owner:SetWalkSpeed(oldWalkSpeed * .7)
-        owner:SetRunSpeed(oldRunSpeed * .7)
-        owner:SetNWInt("IsBerserk", 2)
-        owner:SetHealth(math.Clamp(owner:Health(), 0, owner:GetMaxHealth() * .7))
+        owner:SetHealth(owner:GetMaxHealth() * 1.3)
 
-        timer.Simple(5, function()
-            owner:SetColor(Color(255,255,255))
-            owner:SetWalkSpeed(oldWalkSpeed)
-            owner:SetRunSpeed(oldRunSpeed)
-            owner:SetNWInt("IsBerserk", 0)
-            owner:SetHealth(math.Clamp(owner:Health(), 0, owner:GetMaxHealth()))
+        timer.Simple(10, function() -- remtre a 5
+            owner:SetColor(Color(0,255,234))
+            owner:SetWalkSpeed(oldWalkSpeed * .7)
+            owner:SetRunSpeed(oldRunSpeed * .7)
+            owner:SetNWInt("IsBerserk", 2)
+            owner:SetHealth(math.Clamp(owner:Health(), 0, owner:GetMaxHealth() * .7))
+
+            timer.Simple(5, function()
+                owner:SetSkin(0)
+                owner:SetColor(Color(255,255,255))
+                owner:SetWalkSpeed(oldWalkSpeed)
+                owner:SetRunSpeed(oldRunSpeed)
+                owner:SetNWInt("IsBerserk", 0)
+                owner:SetHealth(math.Clamp(owner:Health(), 0, owner:GetMaxHealth()))
+            end)
         end)
     end)
 end
 
+
 function SWEP:PrimaryAttack()
-    -- local animName = "punch"
-    -- local _, animTime = self:GetOwner():LookupSequence(animName)
-    -- if SERVER then
-    --     GST_SNK.Utils:RunAnimation(animName, self:GetOwner(), true)
-    --     local damagedPlayers = {}
-    --     local buildDestroyed = false
+    local animName = table.Random({"punchl", "punchr"})
+    local _, animTime = self:GetOwner():LookupSequence(animName)
+    if SERVER then
+        GST_SNK.Utils:RunAnimation(animName, self:GetOwner(), true)
+        local damagedPlayers = {}
+        local buildDestroyed = false
 
-    --     timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
-    --         local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightHand"))
+        timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
+            local bonesName = {["punchl"] = "LeftHand", ["punchr"] = "RightHand"}
+            local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:" .. bonesName[animName]))
 
-    --         for _, ply in pairs(ents.FindInSphere(handPos, 60)) do
-    --             if IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() then
-    --                 ply:TakeDamage(1000, self:GetOwner(), self)
-    --                 table.insert(damagedPlayers, ply)
-    --             elseif not buildDestroyed then
-    --                 local tr = util.TraceLine({
-    --                     start = self:GetOwner():EyePos(),
-    --                     endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 280,
-    --                     filter = function(ent) return ent ~= self:GetOwner() end
-    --                 })
+            for _, ply in pairs(ents.FindInSphere(handPos, 60)) do
+                if IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() then
+                    ply:TakeDamage(2000, self:GetOwner(), self)
+                    table.insert(damagedPlayers, ply)
+                elseif not buildDestroyed then
+                    local tr = util.TraceLine({
+                        start = self:GetOwner():EyePos(),
+                        endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 280,
+                        filter = function(ent) return ent ~= self:GetOwner() end
+                    })
 
-    --                 if IsValid(tr.Entity) then
-    --                     GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
-    --                     buildDestroyed = true
-    --                 end
-    --             end
-    --         end
-    --     end)
-    -- else
-    --     self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
-    -- end
-    -- return
+                    if IsValid(tr.Entity) then
+                        GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
+                        buildDestroyed = true
+                    end
+                end
+            end
+        end)
+    else
+        self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
+    end
+    return
 end
 
 function SWEP:SecondaryAttack()
-    -- local animName = "groundpunch"
-    -- local _, animTime = self:GetOwner():LookupSequence(animName)
-    -- if SERVER then
-    --     GST_SNK.Utils:RunAnimation(animName, self:GetOwner(), true)
-    --     local damagedPlayers = {}
-    --     local buildDestroyed = false
+    local animName = "kick"
+    local _, animTime = self:GetOwner():LookupSequence(animName)
+    if SERVER then
+        GST_SNK.Utils:RunAnimation(animName, self:GetOwner(), true)
+        local damagedPlayers = {}
+        local buildDestroyed = false
 
-    --     timer.Simple(animTime * .32, function()
-    --         local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightHand"))
+        timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
+            local handPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightFoot"))
 
-    --         for _, ply in pairs(ents.FindInSphere(handPos, 60)) do
-    --             if IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() then
-    --                 ply:TakeDamage(1000, self:GetOwner(), self)
-    --                 table.insert(damagedPlayers, ply)
-    --             elseif not buildDestroyed then
-    --                 local tr = util.TraceLine({
-    --                     start = self:GetOwner():EyePos(),
-    --                     endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 280,
-    --                     filter = function(ent) return ent ~= self:GetOwner() end
-    --                 })
+            for _, ply in pairs(ents.FindInSphere(handPos, 60)) do
+                if IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() then
+                    ply:TakeDamage(2000, self:GetOwner(), self)
+                    table.insert(damagedPlayers, ply)
+                elseif not buildDestroyed then
+                    local tr = util.TraceLine({
+                        start = self:GetOwner():EyePos(),
+                        endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 280,
+                        filter = function(ent) return ent ~= self:GetOwner() end
+                    })
 
-    --                 if IsValid(tr.Entity) then
-    --                     GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
-    --                     buildDestroyed = true
-    --                 end
-    --             end
-    --         end
-    --     end)
-    -- else
-    --     self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
-    -- end
-    -- return
+                    if IsValid(tr.Entity) then
+                        GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
+                        buildDestroyed = true
+                    end
+                end
+            end
+        end)
+    else
+        self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
+    end
+    return
 end
 
 hook.Add("EntityTakeDamage", "OnArmoredTakeDamage", function(ent, damageInfo)

@@ -160,8 +160,25 @@ GST_SNK.Sounds = {
 if CLIENT then
 	GST_SNK.Fonts = {
 		["DEFAULT"] = "Rise Of Kingdom",
-		["GOTHAM"] = "Gotham"
+		["GOTHAM"] = "Tahoma"
 	}
+
+	surface.CreateFont( "default_leaderboard", {
+		font = GST_SNK.Fonts.GOTHAM,
+		extended = false,
+		size = (ScrW() / 1920) * 255,
+		weight = 500,
+		antialias = true,
+	} )
+
+	surface.CreateFont( "default_leaderboard_text", {
+		font = GST_SNK.Fonts.GOTHAM,
+		extended = false,
+		size = (ScrW() / 1920) * 128,
+		weight = 500,
+		antialias = true,
+	} )
+
 
 	surface.CreateFont( "default_snk_xl", {
 		font = GST_SNK.Fonts.DEFAULT,

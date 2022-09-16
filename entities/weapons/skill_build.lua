@@ -1,8 +1,10 @@
 SWEP.PrintName = "Plan de construction"
 SWEP.AdminSpawnable = true
 SWEP.Spawnable = true
-SWEP.ViewModel = "models/titan/v_hand_v2.mdl"
+SWEP.ViewModel = "models/weapons/c_arms_dod.mdl"
 SWEP.WorldModel = "models/weapons/w_pistol.mdl"
+SWEP.ShowViewModel = true
+SWEP.ShowWorldModel = false
 SWEP.Base = "base_skill"
 SWEP.ViewModelFlip = false
 SWEP.ViewModelFOV = 75
@@ -21,27 +23,32 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 
-SWEP.BaseCooldown = 1
+SWEP.BaseCooldown = 30
 SWEP.Icon = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ENGINEER
 SWEP.IconBack = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ENGINEER_BACK
 
+SWEP.BuildRange = 400
+
 SWEP.AvailableBuild = {
-    ["models/props_c17/oildrum001.mdl"] = {
-        ["Name"] = "Barril",
-        ["Description"] = "Un barril vide",
-        ["Time"] = 30,
+    ["models/props_trenches/r_czech_hedgehog.mdl"] = {
+        ["Name"] = "hérisson tchèque",
+        ["Description"] = "Ça arrete les tanks, pourquoi pas les titans?",
+        ["Time"] = 1200,
+        ["Rotation"] = Angle(0,0,0),
         ["EntityClass"] = "build_prop"
     },
-    ["models/props_c17/concrete_barrier001a.mdl"] = {
-        ["Name"] = "Petit mur",
-        ["Description"] = "Un petit mur pouvant bloquer les projectils",
-        ["Time"] = 30,
+    ["models/props_trenches/lapland02_128.mdl"] = {
+        ["Name"] = "Barbelé",
+        ["Description"] = "Ralenti et blesse vos ennemis",
+        ["Time"] = 1200,
+        ["Rotation"] = Angle(0,0,0),
         ["EntityClass"] = "build_prop"
     },
-    ["models/props_lab/blastdoor001a.mdl"] = {
-        ["Name"] = "Porte",
-        ["Description"] = "Une porte...",
-        ["Time"] = 10,
+    ["models/props_fortifications/sandbags_corner2_tall.mdl"] = {
+        ["Name"] = "Mur de sac de sable",
+        ["Description"] = "Protege des balles",
+        ["Time"] = 1200,
+        ["Rotation"] = Angle(0,0,0),
         ["EntityClass"] = "build_prop"
     }
 }
@@ -60,7 +67,7 @@ if CLIENT then
         end
 
         if (self.lastSelection) then
-            GST_SNK.Utils:CreateGhost(self.lastSelection, self, 1500)
+            GST_SNK.Utils:CreateGhost(self.lastSelection, self, self.BuildRange)
         end
     end
 
@@ -87,6 +94,8 @@ if SERVER then
     util.AddNetworkString("PlaceBuild")
 
     net.Receive("PlaceBuild", function(len, ply)
+        if (not ply.canUseSkill) then return end
+
         local pos = net.ReadVector()
         local angle = net.ReadAngle()
         local model = net.ReadString()
@@ -107,6 +116,12 @@ if SERVER then
             build:SetAngles(angle)
             build:Spawn()
             build:SetPos(pos)
+
+            local phys = build:GetPhysicsObject()
+            if IsValid(phys) then
+                phys:EnableMotion(false)
+            end
+
             build:Fire("kill", nil, buildInfo.Time)
         end
     end)

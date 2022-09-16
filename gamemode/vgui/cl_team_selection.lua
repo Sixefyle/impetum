@@ -54,7 +54,7 @@ function team_menu()
 		if (vip_required and not isVIP) then
 			draw.SimpleText("VIP Requis", "default_snk", w / 2, (h / 2) + nonVipOffset, Color(235, 0, 0, 100), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		else
-			draw.SimpleText(table.Count(LocalPlayer().unlocked_classes.Titan) .. " / " .. table.Count(GST_SNK.Classes.Titan) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(table.Count(LocalPlayer().classes.Titan) .. " / " .. table.Count(GST_SNK.Classes.Titan) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 
@@ -89,7 +89,7 @@ function team_menu()
 		if (vip_required and not isVIP) then
 			draw.SimpleText("VIP Requis", "default_snk", w / 2, (h / 2) + nonVipOffset, Color(235, 0, 0, 100), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		else
-			draw.SimpleText(table.Count(LocalPlayer().unlocked_classes.Eldien) .. " / " .. table.Count(GST_SNK.Classes.Eldien) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(table.Count(LocalPlayer().classes.Eldien) .. " / " .. table.Count(GST_SNK.Classes.Eldien) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 
@@ -123,7 +123,7 @@ function team_menu()
 		if (vip_required and not isVIP) then
 			draw.SimpleText("VIP Requis", "default_snk", w / 2, (h / 2) + nonVipOffset, Color(235, 0, 0, 100), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		else
-			draw.SimpleText(table.Count(LocalPlayer().unlocked_classes.Mahr) .. " / " .. table.Count(GST_SNK.Classes.Mahr) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(table.Count(LocalPlayer().classes.Mahr) .. " / " .. table.Count(GST_SNK.Classes.Mahr) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 
@@ -136,9 +136,11 @@ function team_menu()
 	team_button_primo.Team = "Primordial"
 
 	function team_button_primo:DoClick()
-		OpenClassMenu(team_button_primo.Team)
-		surface.PlaySound("/UI/buttonclick.wav")
-		team_menu_frame:Remove()
+		--if table.HasValue({"vip", "moderator", "admin", "superadmin"}, LocalPlayer():GetUserGroup()) then
+			OpenClassMenu(team_button_primo.Team)
+			surface.PlaySound("/UI/buttonclick.wav")
+			team_menu_frame:Remove()
+		--end
 	end
 
 	primordial_color = GST_SNK.Teams[team_button_primo.Team].color
@@ -156,7 +158,7 @@ function team_menu()
 		if (vip_required and not isVIP) then
 			draw.SimpleText("VIP Requis", "default_snk", w / 2, (h / 2) + nonVipOffset, Color(235, 0, 0, 100), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		else
-			draw.SimpleText(table.Count(LocalPlayer().unlocked_classes.Primordial) .. " / " .. table.Count(GST_SNK.Classes.Primordial) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(table.Count(LocalPlayer().classes.Primordial) .. " / " .. table.Count(GST_SNK.Classes.Primordial) .. " Classes", "default_snk_large", w / 2, (h / 2) + nonVipOffset, Color(255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 	end
 

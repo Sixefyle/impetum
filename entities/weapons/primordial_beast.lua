@@ -21,31 +21,36 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 SWEP.NextReload = 0
-SWEP.TitanModel = "models/gst/Bestial.mdl"
+SWEP.TitanModel = "models/gst/titan_bestial.mdl"
 
-SWEP.BaseHeight = 7
+SWEP.BaseHeight = 18
 SWEP.HumanBaseHeight = 1.8
-SWEP.BaseCameraOffset = 164
+SWEP.BaseCameraOffset = 64
 SWEP.AttackSpeed = 1
 SWEP.SpeedIncrease = 1.4
 
 SWEP.RockTypes = {
+    "models/props/cs_militia/militiarock05.mdl",
     "models/props/cs_militia/militiarock03.mdl",
     "models/props/cs_militia/militiarock02.mdl",
     "models/props/cs_militia/militiarock01.mdl",
 }
 
+function SWEP:AfterDeploy()
+    self:GetOwner():SetNoTarget(true)
+end
+
 function SWEP:Initialize()
     self.Skills = {
         [1] = {
             ["Name"] = "test1",
-            ["Cooldown"] = 5,
+            ["Cooldown"] = 2,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_BEAST_FIRST_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_BEAST_FIRST_SPELL_BACK,
         },
         [2] = {
             ["Name"] = "test2",
-            ["Cooldown"] = 10,
+            ["Cooldown"] = 2,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_BEAST_SECOND_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_BEAST_SECOND_SPELL_BACK,
         },
@@ -56,21 +61,10 @@ function SWEP:Initialize()
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_BEAST_THIRD_SPELL_BACK,
         },
     }
-
 end
 
-function SWEP:GetSpawnPos()
-    return GST_SNK.Utils:GetWorldHeightPos(self:GetOwner():GetPos() + (Vector(math.random(-1, 1), math.random(-1, 1), 1) * 200))
-end
-
-function SWEP:GetNearEntsAmount(pos, range, exclude)
-    local entTable = {}
-    for _, ent in pairs(ents.FindInSphere(pos, range)) do
-        if (not table.HasValue(exclude, ent:GetName())) then
-            table.insert(entTable, ent)
-        end
-    end
-    return #entTable
+function SWEP:GetSpawnPos(range)
+    return GST_SNK.Utils:GetWorldHeightPos(self:GetOwner():GetPos() + (Vector(math.random(-1, 1), math.random(-1, 1), 1) * range))
 end
 
 function SWEP:FirstSpell()
@@ -91,7 +85,7 @@ function SWEP:FirstSpell()
 
             projectile:SetPos( pos )
 
-            projectile:SetAngles(owner:EyeAngles() + Angle(AngleRand(-10, 10), AngleRand(-10, 10) , AngleRand(0, 20)))
+            projectile:SetAngles(owner:EyeAngles() + Angle(AngleRand(-5, 5), AngleRand(-5, 5) , AngleRand(0, 20)))
             projectile:Spawn()
 
             local phys = projectile:GetPhysicsObject()
@@ -108,21 +102,26 @@ end
 
 function SWEP:SecondSpell()
     self:GetOwner():SetNoTarget(true)
-    GST_SNK.Utils:RunAnimation("roar", self:GetOwner(), true)
-    self:GetOwner():EmitSound("gst/titan/scream_beast.wav")
+    
+    --self:GetOwner():EmitSound("gst/titan/scream_beast.wav")
 
+    GST_SNK.Utils:PlaySoundToAllPlayer("gst/titan/scream_beast.wav")
+
+    timer.Simple(.5, function()
+        GST_SNK.Utils:RunAnimation("roar", self:GetOwner(), true)
+    end)
 
     timer.Simple(2, function()
         local amountToSpawn = math.random(2, 4)
-        local posToSpawn = self:GetSpawnPos()
+        local posToSpawn = self:GetSpawnPos(200)
 
         local maxTry = 500
         local try = 0
         for index = 1, amountToSpawn do
             local titan = ents.Create("nextbot_titan")
 
-            while (self:GetNearEntsAmount(posToSpawn, 150, {"accroche"}) > 0) do
-                posToSpawn = self:GetSpawnPos()
+            while (GST_SNK.Utils:GetNearEntsAmount(posToSpawn, 75, {"accroche"}) > 0) do
+                posToSpawn = self:GetSpawnPos(650)
                 try = try + 1
                 if (try >= maxTry) then
                     return

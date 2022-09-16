@@ -5,6 +5,14 @@ GST_SNK.Teams = {
         name = "Eldien",
         color = Color(95, 202, 109),
         spawn_name = "spawn_eldien",
+        models = {
+            "models/hydralis/kaouet/soldat_masculin/garnison/soldat_masculin_garnison_2.mdl",
+            "models/hydralis/kaouet/soldat_masculin/brigade/soldat_masculin_brigade_2.mdl",
+            "models/hydralis/kaouet/soldat_masculin/bataillon/soldat_masculin_bataillon_2.mdl",
+            "models/hydralis/kaouet/soldat_feminin/garnison/soldat_feminin_garnison_2.mdl",
+            "models/hydralis/kaouet/soldat_feminin/brigade/soldat_feminin_brigade_2.mdl",
+            "models/hydralis/kaouet/soldat_feminin/bataillon/soldat_feminin_bataillon_2.mdl"
+        },
         require_vip = false
     },
     ["Mahr"] = {
@@ -42,6 +50,14 @@ GST_SNK.Teams = {
     },
 }
 
+local plyMeta = FindMetaTable( "Player" )
+function plyMeta:GetTeam()
+    return GST_SNK:GetTeam(self:Team())
+end
+
+function GM:ShowTeam( ply )
+
+end
 
 function GM:CreateTeams()
     for _, currentTeam in pairs(GST_SNK.Teams) do
@@ -51,8 +67,10 @@ end
 
 function GM:PlayerSelectSpawn(ply, transition)
     local spawns = ents.FindByClass("info_player_start")
-    if (ply:GetTeam() and ply:GetTeam().spawn_name) then
-        spawns = ents.FindByName(ply:GetTeam().spawn_name)
+    local playerTeam = ply:GetTeam()
+
+    if (playerTeam and playerTeam.spawn_name) then
+        spawns = ents.FindByName(ply.requested_team and ply.requested_team.spawn_name or playerTeam.spawn_name)
     end
     return spawns[math.random(#spawns)]
 end
@@ -91,10 +109,8 @@ end
 function GST_SNK:InitTeamStats()
     if (not GST_SNK.Teams.Eldien.set_player_info) then
         GST_SNK.Teams.Eldien.set_player_info = function(ply)
-
             Handle3Dmg(ply, true)
-
-            ply:SetModel("models/hydralis/kaouet/soldat_masculin/brigade/soldat_masculin_brigade_1.mdl")
+            ply:SetModel(table.Random(GST_SNK.Teams.Eldien.models))
             ply:GodDisable()
             ply:SetNoTarget(false)
             ply:SetModelScale(1, 0)
@@ -103,6 +119,8 @@ function GST_SNK:InitTeamStats()
             --ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
             ply:SetViewOffset(Vector(0, 0, 64))
             ply:SetViewOffsetDucked(Vector(0, 0, 32))
+            ply:SetJumpPower(200)
+            ply:SetJumpPower(200)
             --ply:ResetHull()
         end
     end
@@ -122,6 +140,8 @@ function GST_SNK:InitTeamStats()
             --ply:SetHullDuck(Vector(-16, -16, 0), Vector(16, 16, 36))
             ply:SetViewOffset(Vector(0, 0, 64))
             ply:SetViewOffsetDucked(Vector(0, 0, 32))
+            ply:SetJumpPower(200)
+            ply:SetJumpPower(200)
             --ply:ResetHull()
         end
     end
@@ -131,6 +151,8 @@ function GST_SNK:InitTeamStats()
             Handle3Dmg(ply, false)
             ply:GodDisable()
             ply:SetNoTarget(true)
+            ply:SetJumpPower(0)
+            ply:SetJumpPower(0)
         end
     end
 
@@ -139,6 +161,8 @@ function GST_SNK:InitTeamStats()
             Handle3Dmg(ply, false)
             ply:GodDisable()
             ply:SetNoTarget(true)
+            ply:SetJumpPower(0)
+            ply:SetJumpPower(0)
         end
     end
 
@@ -167,7 +191,7 @@ function GST_SNK:InitTeamStats()
         GST_SNK.Teams.NoTeam.set_player_info = function(ply)
             ply:SetHealth(100)
             ply:GodEnable()
-            ply:SetModel("models/hydralis/kaouet/civil_masculin/noble_masculin/noble_1/npc_civil_masculin_noble_1.mdl")
+            ply:SetModel("models/gst/playermodel/mahr_2.mdl")
 
             if not ply:Alive() then
                 ply:Spawn()
@@ -177,9 +201,18 @@ function GST_SNK:InitTeamStats()
     end
 end
 
-function GST_SNK:RequestTeamSwitch(ply, newTeam, class)
+function GST_SNK:RequestTeamSwitch(ply, newTeam, class, className)
     if (class.isDisabled) then
         ply:ChatPrint("Cette classe est désactivé et ne peut pas être utilisé pour le moment !")
+        return
+    end
+
+    if not (className == "Titan5") and
+        (newTeam == GST_SNK.Teams.Primordial or
+        newTeam == GST_SNK.Teams.Titan) and
+        not table.HasValue({"vip", "moderator", "admin", "superadmin"}, ply:GetUserGroup()) then
+
+        ply:ChatPrint("Vous devez être VIP pour pouvoir prendre un primordial ou un titan autre que 5 mètres !")
         return
     end
 
@@ -188,22 +221,24 @@ function GST_SNK:RequestTeamSwitch(ply, newTeam, class)
             ply.initialSpawn = false
             ply:KillSilent()
         end
-        GST_SNK:SwitchTeam(ply, newTeam, class)
+
+
+        GST_SNK:SwitchTeam(ply, newTeam, class, className)
     else
-        ply:ChatPrint("Changement d'équipe lors de votre prochaine réapparition (" .. newTeam.name .. " - " .. class.display_name .. ")")
+        ply:ChatPrint("Changement d'équipe lors de votre prochaine réapparition (" .. newTeam.name .. " - " .. className .. ")")
         ply.requested_team = newTeam
         ply.requested_class = class
+        ply.requested_class_name = className
+        ply.requested_class_name = className
     end
 end
 
-function GST_SNK:SwitchTeam(ply, newTeam, class)
+function GST_SNK:SwitchTeam(ply, newTeam, class, className)
     if (class and class.isDisabled) then
         ply:ChatPrint("La classe que vous aviez choisit est désactivé !")
         ply:ChatPrint("Veuillez choisir une autre classe.")
         return
     end
-
-    ply:ChatPrint("Nouvelle équipe (" .. newTeam.name .. ")")
 
     ply:SetNoTarget(false)
     if (ply:GetTeam() ~= newTeam) then
@@ -212,7 +247,8 @@ function GST_SNK:SwitchTeam(ply, newTeam, class)
     end
 
     if (class) then
-        ply:SetClass(class)
+        ply:SetClass(class, className)
+        ply:ChatPrint("Nouvelle équipe (" .. newTeam.name .. " - " .. className .. ")")
     end
     ply:SetPlayerColor(Vector(newTeam.color.r / 255, newTeam.color.g / 255, newTeam.color.b / 255))
 
@@ -229,15 +265,12 @@ function GST_SNK:SwitchTeam(ply, newTeam, class)
 end
 
 function GST_SNK:GetTeam(id)
-    for _, currentTeam in pairs(GST_SNK.Teams) do
+    for teamName, currentTeam in pairs(GST_SNK.Teams) do
         if (currentTeam.id == id) then
+            currentTeam.indexName = teamName
+            currentTeam.indexName = teamName
             return currentTeam
         end
     end
-    return nil
-end
-
-local ply = FindMetaTable( "Player" )
-function ply:GetTeam()
-    return GST_SNK:GetTeam(self:Team())
+    return {}
 end

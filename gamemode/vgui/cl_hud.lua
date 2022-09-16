@@ -31,12 +31,18 @@ local function SkillDrop(receiver, tableOfDroppedPanels, isDropped, menuIndex, m
 end
 
 local function SetLowEffect(elem, name)
+	if not elem or not name then return end
+
 	local min = 120
 	local red = min
 	local bright = true
 
 	if (not timer.Exists("Low" .. name .. "Effect")) then
 		timer.Create("Low" .. name .. "Effect", 0, 0, function()
+			if not elem or not elem:GetBackgroundColor() then
+				timer.Remove("Low" .. name .. "Effect")
+			end
+
 			if (elem) then
 				if (bright) then
 					red = red + 3
@@ -102,19 +108,19 @@ function ply:RefreshHud()
         draw.SimpleText(self:GetTeam().name .. " - " .. self.class.display_name, "default_snk_small", 5, h / 2, Color(255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
     end
 
-    player_health_bar = vgui.Create("DPanel", self.player_hud)
-    player_health_bar:SetPos(111, 75)
-    player_health_bar:SetSize(186 * (self:Health() / self:GetMaxHealth()), 18)
-    player_health_bar:SetBackgroundColor(self.preference.health_bar_color)
+    LocalPlayer().player_health_bar = vgui.Create("DPanel", self.player_hud)
+    LocalPlayer().player_health_bar:SetPos(111, 75)
+    LocalPlayer().player_health_bar:SetSize(186 * (self:Health() / self:GetMaxHealth()), 18)
+    LocalPlayer().player_health_bar:SetBackgroundColor(self.preference.health_bar_color)
 
 	if(self:Health() < self:GetMaxHealth() / 2) then
-		SetLowEffect(player_health_bar, "Health")
+		SetLowEffect(LocalPlayer().player_health_bar, "Health")
 	end
 
-    player_armor_bar = vgui.Create("DPanel", self.player_hud)
-    player_armor_bar:SetPos(78, 110)
-    player_armor_bar:SetSize(185 * (self:Armor() / self:GetMaxArmor()), 18)
-    player_armor_bar:SetBackgroundColor(self.preference.armor_bar_color)
+    LocalPlayer().player_armor_bar = vgui.Create("DPanel", self.player_hud)
+    LocalPlayer().player_armor_bar:SetPos(78, 110)
+    LocalPlayer().player_armor_bar:SetSize(185 * (self:Armor() / self:GetMaxArmor()), 18)
+    LocalPlayer().player_armor_bar:SetBackgroundColor(self.preference.armor_bar_color)
 
     player_class_icon = vgui.Create("DPanel", self.player_hud)
     player_class_icon:SetPos(-4, -8)
@@ -233,6 +239,7 @@ end
 
 function ply:ShowCapturePoints()
 	local panel = vgui.Create("DPanel", self.base)
+	panel:SetPos(0, 80)
 	panel:SetSize(220, 66)
 	panel:CenterHorizontal()
 	panel:SetBackgroundColor(Color(255,0,0,0))
@@ -296,15 +303,17 @@ end
 function ply:WeaponCooldownBar(timeLeft)
 	local cooldown = timeLeft - CurTime()
 
-	self.weap_cooldown_bar_filled:SetSize(0, 5)
-	timer.Create("WeaponCooldownBar", 0, 0, function()
-		local fillAmount = (CurTime() - timeLeft + cooldown) / cooldown * 100
-		self.weap_cooldown_bar_filled:SetSize(fillAmount, 5)
+	if (self.weap_cooldown_bar_filled) then
+		self.weap_cooldown_bar_filled:SetSize(0, 5)
+		timer.Create("WeaponCooldownBar", 0, 0, function()
+			local fillAmount = (CurTime() - timeLeft + cooldown) / cooldown * 100
+			self.weap_cooldown_bar_filled:SetSize(fillAmount, 5)
 
-		if (fillAmount >= 100) then
-			timer.Remove("WeaponCooldownBar")
-		end
-	end)
+			if (fillAmount >= 100) then
+				timer.Remove("WeaponCooldownBar")
+			end
+		end)
+	end
 end
 
 function ShowSkillIcon(icon, iconBack, key)
@@ -323,6 +332,7 @@ function ShowSkillIcon(icon, iconBack, key)
 	cooldown_icon_upper:SetPos(0, 0)
 	cooldown_icon_upper:SetSize(147, 147)
 	cooldown_icon_upper:SetImage(icon)
+	cooldown_icon_upper:SetMouseInputEnabled(true)
 
 	if (key) then
 		button_panel = vgui.Create("DPanel", cooldown_icon_lower)
@@ -356,7 +366,7 @@ function ply:HudUpdateCooldown(panel_upper, icon_upper)
 	if (skill and not timer.Exists("HudSkillUpdate" .. skill:GetClass())) then
 		local savedSkill = skill
 		timer.Create("HudSkillUpdate" .. savedSkill:GetClass(), 0, 0, function()
-			if (savedSkill and savedSkill:GetCooldown() > CurTime()) then
+			if (savedSkill and savedSkill.GetCooldown and savedSkill:GetCooldown() > CurTime()) then
 				local cooldownLeft = savedSkill:GetTimeCooldown()
 				local cooldown = savedSkill:GetNWFloat("LastCooldown")
 
@@ -418,27 +428,32 @@ function ply:HudForceRefresh()
 		self.base:Remove()
 	end
 	self:RefreshHud()
+
+	timer.Create("RefreshHealthArmorBar", .3, 0, function()
+		LocalPlayer().player_health_bar:SetSize(186 * (LocalPlayer():Health() / LocalPlayer():GetMaxHealth()), 18)
+		LocalPlayer().player_armor_bar:SetSize(185 * (LocalPlayer():Armor() / LocalPlayer():GetMaxArmor()), 18)
+	end)
 end
 
 function hud()
 	LocalPlayer():HudForceRefresh()
 end
 
-net.Receive("WeaponCooldownStart", function()
+net.Receive("AOTA:TC:WeaponCooldownStart", function()
 	LocalPlayer():WeaponCooldownBar(net.ReadDouble())
 end)
 
-net.Receive("ShowRepairBar", function()
+net.Receive("AOTA:TC:ShowRepairBar", function()
 	LocalPlayer():ShowRepairBar(net.ReadBool())
 end)
 
-net.Receive("ForceHudRefresh", function()
+net.Receive("AOTA:TC:ForceHudRefresh", function()
 	if (IsValid(LocalPlayer())) then
 		LocalPlayer():HudForceRefresh()
 	end
 end)
 
-net.Receive("UpdatePlayerHudGas", function()
+net.Receive("AOTA:TC:UpdatePlayerHudGas", function()
 	LocalPlayer():HudRefreshGas()
 end)
 

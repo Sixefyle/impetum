@@ -21,11 +21,11 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 SWEP.NextReload = 0
-SWEP.TitanModel = "models/gst/Feminin.mdl"
+SWEP.TitanModel = "models/gst/titan_feminin.mdl"
 
-SWEP.BaseHeight = 8
+SWEP.BaseHeight = 16
 SWEP.HumanBaseHeight = 1.8
-SWEP.BaseCameraOffset = 128
+SWEP.BaseCameraOffset = 64
 SWEP.AttackSpeed = 1
 SWEP.SpeedIncrease = 1.4
 
@@ -33,13 +33,13 @@ function SWEP:Initialize()
     self.Skills = {
         [1] = {
             ["Name"] = "test1",
-            ["Cooldown"] = 5,
+            ["Cooldown"] = 30,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_FEMALE_FIRST_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_FEMALE_FIRST_SPELL_BACK,
         },
         [2] = {
             ["Name"] = "test2",
-            ["Cooldown"] = 5,
+            ["Cooldown"] = 120,
             ["Icon"] = GST_SNK.Images.SKILL_PRIMORDIAL_FEMALE_SECOND_SPELL,
             ["IconBack"] = GST_SNK.Images.SKILL_PRIMORDIAL_FEMALE_SECOND_SPELL_BACK,
         },
@@ -54,7 +54,7 @@ end
 
 function SWEP:FirstSpell()
     GST_SNK.Utils:RunAnimation("roar", self:GetOwner(), true)
-    self:GetOwner():EmitSound("gst/titan/scream_female.wav")
+    GST_SNK.Utils:PlaySoundToAllPlayer("gst/titan/scream_female.wav")
 
     for _, ent in pairs(ents.FindInSphere(self:GetOwner():GetPos(), 5000)) do
         if (IsValid(ent) and ent:IsNextBot()) then
@@ -71,8 +71,8 @@ function SWEP:SecondSpell()
     end) 
     timer.Simple(GST_SNK.Utils:RunAnimation("crystalin", self:GetOwner(), true), function()
         GST_SNK.Utils:RunAnimation("crystalidle", self:GetOwner(), true, 10)
-        timer.Create("Heal" .. self:GetOwner():EntIndex(), 1, 10, function()
-            self:GetOwner():SetHealth(math.Clamp(self:GetOwner():Health() + (self:GetOwner():GetMaxHealth() * .165), 0, self:GetOwner():GetMaxHealth()))
+        timer.Create("Heal" .. self:GetOwner():EntIndex(), .3, 33, function()
+            self:GetOwner():SetHealth(math.Clamp(self:GetOwner():Health() + (self:GetOwner():GetMaxHealth() * .0335), 0, self:GetOwner():GetMaxHealth()))
             if (timer.RepsLeft("Heal" .. self:GetOwner():EntIndex()) == 1) then
                 GST_SNK.Utils:RunAnimation("crystalout", self:GetOwner(), true)
                 self:GetOwner():SetSkin(0)

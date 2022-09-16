@@ -22,7 +22,7 @@ function GetPlayerPreference()
     else
         LocalPlayer().preference = util.JSONToTable(file.Read("gst/snk/player_config.json"))
         --LocalPlayer().preference["skill_key"] = {2, 3, 4}
-        net.Start("SendPlayerShortcut")
+        net.Start("AOTA:TS:SendPlayerShortcut")
             net.WriteTable(LocalPlayer().preference["server_only_sc"])
         net.SendToServer()
     end
@@ -32,7 +32,7 @@ function SavePlayerPreference()
     if (file.Exists("gst/snk/player_config.json", "DATA")) then
        file.Write("gst/snk/player_config.json", util.TableToJSON(LocalPlayer().preference))
     end
-    net.Start("SendPlayerShortcut")
+    net.Start("AOTA:TS:SendPlayerShortcut")
         net.WriteTable(LocalPlayer().preference["server_only_sc"])
     net.SendToServer()
 end

@@ -1,8 +1,8 @@
 SWEP.PrintName = "Trousse de soin"
 SWEP.AdminSpawnable = true
 SWEP.Spawnable = true
-SWEP.ViewModel = "models/titan/v_hand_v2.mdl"
-SWEP.WorldModel = "models/weapons/w_pistol.mdl"
+SWEP.ViewModel = "models/weapons/v_ifak.mdl"
+SWEP.WorldModel = "models/weapons/w_ifak.mdl"
 SWEP.Base = "base_skill"
 SWEP.ViewModelFlip = false
 SWEP.ViewModelFOV = 75
@@ -11,7 +11,7 @@ SWEP.AutoSwitchFrom = true
 SWEP.DrawAmmo = false
 SWEP.Slot = 1
 SWEP.SlotPos = 1
-SWEP.HoldType = "melee"
+SWEP.HoldType = "slam"
 SWEP.DrawCrosshair = true
 SWEP.Weight = 0
 SWEP.Category = "GST"
@@ -21,7 +21,7 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 
-SWEP.BaseCooldown = 15
+SWEP.BaseCooldown = 60
 SWEP.Icon = GST_SNK.Images.SKILL_HUMAN_ELDIEN_HEALER
 SWEP.IconBack = GST_SNK.Images.SKILL_HUMAN_ELDIEN_HEALER_BACK
 
@@ -39,6 +39,7 @@ if SERVER then
             local ent = trace.Entity
             if (IsValid(ent) and ent:IsPlayer()) then
                 ent:SetHealth(ent:GetMaxHealth())
+                ent:SetArmor(ent:GetMaxArmor())
                 self:SetCooldown()
             else
                 self:GetOwner():PrintMessage(3, "Il n'y a personne devant vous!")
@@ -49,6 +50,7 @@ if SERVER then
 
     function SWEP:UseSkill()
         self:GetOwner():SetHealth(self:GetOwner():GetMaxHealth())
+        self:GetOwner():SetArmor(self:GetOwner():GetMaxArmor())
     end
 end
 

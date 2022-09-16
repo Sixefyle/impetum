@@ -47,7 +47,7 @@ end
 function SWEP:UseSkill() end
 
 function SWEP:PrimaryAttack()
-    if (self:CanPrimaryAttack()) then
+    if (self:CanPrimaryAttack() and self:GetOwner().canUseSkill) then
         self:SetCooldown()
         self:UseSkill()
     end

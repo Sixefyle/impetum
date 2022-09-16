@@ -29,11 +29,12 @@ SWEP.TitanModel = {
     "models/gst/titan_5.mdl",
     "models/gst/titan_6.mdl",
     "models/gst/titan_7.mdl",
-} 
+}
 SWEP.BaseHeight = 7
 SWEP.HumanBaseHeight = 1.8
 SWEP.AttackSpeed = 1
 SWEP.SpeedIncrease = 1.4
+SWEP.GrabDelay = 5
 
 -- if CLIENT then
 --     function SWEP:Think()
@@ -42,17 +43,23 @@ SWEP.SpeedIncrease = 1.4
 --     end
 -- end
 hook.Add( "PlayerFootstep", "TitanFootStep", function( ply, pos, foot, sound, volume, rf )
-	if (ply:GetTeam().name == "Titan") then
+	if (ply:GetTeam() and ply:GetTeam().name == "Titan") then
         ply:EmitSound( "gst/titan_footstep.wav" ) -- Play the footsteps hunter is using
         return true -- Don't allow default footsteps, or other addon footsteps
     end
 end )
 
 function SWEP:Initialize()
+    local owner = self:GetOwner()
+    owner.WalkAct = table.Random({ACT_MP_RUN, ACT_WALK_RELAXED})
+    owner.RunAct = table.Random({ACT_MP_RUN, ACT_RUN_RELAXED})
 end
 
 function SWEP:Deploy()
     local owner = self:GetOwner()
+    owner.WalkAct = table.Random({ACT_MP_RUN, ACT_WALK_RELAXED})
+    owner.RunAct = table.Random({ACT_MP_RUN, ACT_RUN_RELAXED})
+
     local realSize = owner:GetCurrentClass().size and owner:GetCurrentClass().size or self.BaseHeight
     self:SetNWInt("Size", realSize / self.HumanBaseHeight)
     self:SetHoldType(self.HoldType)
@@ -75,9 +82,9 @@ function SWEP:Deploy()
                 owner:ManipulateBoneAngles(owner:LookupBone("mixamorig:Spine"), Angle(0, 0, math.Clamp(angle[1], -80, 60)))
             end
         end)
-
-        owner:SetJumpPower(0)
     end
+
+    self:GetOwner():SetNoTarget(true)
 end
 
 function SWEP:Holster()
@@ -96,7 +103,7 @@ end
 
 function SWEP:GrabPlayer(ply)
     if IsValid(ply) then
-        ply:SetMoveType(MOVETYPE_NONE)
+        ply:Freeze(true)
         GST_SNK.Utils:RunAnimation("grab_player_manger", self:GetOwner())
         local _, eatAnimTime = self:GetOwner():LookupSequence("grab_player_manger")
         self:SetNextPrimaryFire(CurTime() + eatAnimTime)
@@ -114,9 +121,9 @@ function SWEP:GrabPlayer(ply)
 
         timer.Simple(eatAnimTime - 1, function()
             timer.Remove("grabPlayer" .. self:EntIndex())
-            ply:TakeDamage(99999999, self:GetOwner(), self)
+            ply:TakeDamage(9999, self:GetOwner(), self)
             self:GetOwner():Freeze(false)
-            ply:SetMoveType(MOVETYPE_WALK)
+            ply:Freeze(false)
         end)
     end
 end
@@ -133,64 +140,78 @@ function SWEP:Reload()
 
                 -- Check nearby player from the hand and grab them
                 for _, ply in pairs(ents.FindInSphere(handPos, 80)) do
-                    if IsValid(ply) and ply:IsPlayer() and ply:Alive() and ply ~= self:GetOwner() then
+                    if IsValid(ply) and ply:IsPlayer() and ply:Alive() and ply ~= self:GetOwner() and
+                    table.HasValue({GST_SNK.Teams.Eldien, GST_SNK.Teams.Mahr}, ply:GetTeam()) then
                         self:GrabPlayer(ply)
                         timer.Remove("checkNearbyPlayer" .. self:EntIndex())
                     end
                 end
-
-                -- if timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) == 1 then
-                --     if not IsValid(grabbedPlayer) then
-                --         self:GetOwner():Freeze(false)
-                --     end
-                -- end
             end)
         else
-            self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
+            self:GetOwner():WeaponCooldownBar(CurTime() + animTime + self.GrabDelay)
         end
-        self:SetNextReload(CurTime() + animTime)
+        self:SetNextReload(CurTime() + animTime + self.GrabDelay)
     end
 end
 
 function SWEP:SecondaryAttack()
     if IsFirstTimePredicted() and self:CanSecondaryAttack() then
-        local _, animTime = self:GetOwner():LookupSequence("kick")
+        local owner = self:GetOwner()
+        local _, animTime = self:GetOwner():LookupSequence("falling")
 
         if SERVER then
-            GST_SNK.Utils:RunAnimation("kick", self:GetOwner(), true)
-            local damagedPlayers = {}
-            local buildDestroyed = false
-
-            timer.Create("checkNearbyPlayer" .. self:EntIndex(), .1, animTime * 10, function()
-                local footPos = self:GetOwner():GetBonePosition(self:GetOwner():LookupBone("mixamorig:RightFoot"))
-
-                if timer.Exists("checkNearbyPlayer" .. self:EntIndex()) and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) <= animTime * 10 and timer.RepsLeft("checkNearbyPlayer" .. self:EntIndex()) >= animTime * 7 then
-                    for _, ply in pairs(ents.FindInSphere(footPos, 120)) do
-                        if IsValid(ply) and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() then
-                            ply:TakeDamage(10000, self:GetOwner(), self)
-                            table.insert(damagedPlayers, ply)
-                        elseif not buildDestroyed then
-                            local tr = util.TraceLine({
-                                start = self:GetOwner():EyePos(),
-                                endpos = self:GetOwner():GetPos() + self:GetOwner():GetAngles():Forward() * 280,
-                                filter = function(ent) return ent ~= self:GetOwner() end
-                            })
-
-                            if IsValid(tr.Entity) then
-                                GST_SNK.Utils:BreakNextBuildState(tr.Entity:GetName())
-                                buildDestroyed = true
-                            end
-                        end
+            owner:ManipulateBoneAngles(owner:LookupBone("mixamorig:Spine"), Angle(0, 0, 0))
+            GST_SNK.Utils:RunAnimation("falling", owner, true)
+            timer.Simple(1, function()
+                local hullMin = self:LocalToWorld(Vector(owner:GetModelScale() * 30, owner:GetModelScale() * 15, -10))
+                local hullMax = self:LocalToWorld(Vector(owner:GetModelScale() * -30, owner:GetModelScale() * -15, 30))
+                for _, ent in pairs(ents.FindInBox(hullMin, hullMax)) do
+                    if (ent:IsValid() and ent:IsPlayer()) then
+                        ent:TakeDamage(9999, owner, self)
                     end
                 end
             end)
         else
-            self:GetOwner():WeaponCooldownBar(CurTime() + animTime)
+            owner:WeaponCooldownBar(CurTime() + animTime)
         end
 
         self:SetNextSecondaryFire(CurTime() + animTime)
     end
 end
+
+hook.Add( "PostDrawTranslucentRenderables", "test", function()
+    -- render.SetColorMaterial()
+
+    -- for _, ent in pairs(ents.FindByClass("vj_titan")) do
+    --     render.DrawLine(LocalPlayer():GetPos(), ent:GetBonePosition(ent:LookupBone("mixamorig:Head")), Color(255,0,0), true)
+    -- end
+
+    -- local weap = LocalPlayer():GetActiveWeapon()
+    -- local ang = LocalPlayer():EyeAngles()
+    -- ang.x = 0
+
+    -- for _, ent in pairs(ents.FindByClass("vj_titan")) do
+    --     render.DrawWireframeBox(ent:GetPos(), ent:EyeAngles(),
+    --     Vector(ent:GetModelScale() * 40, ent:GetModelScale() * 15,0), Vector(ent:GetModelScale() * -30, ent:GetModelScale() * -35, 60), Color(255,0,0), true)
+    -- end
+
+    -- render.DrawWireframeBox(LocalPlayer():GetPos(), ang,
+    --     Vector(LocalPlayer():GetModelScale() * 30,LocalPlayer():GetModelScale() * 15,0), Vector(LocalPlayer():GetModelScale() * -30, LocalPlayer():GetModelScale() * -15,30), Color(255,0,0), true)
+end)
+
+if SERVER then
+    function SWEP:Think()
+        local owner = self:GetOwner()
+        if (owner:GetVelocity():Length2DSqr() >= 100) then
+            for _, ply in pairs(ents.FindInSphere(owner:GetPos(), 70)) do
+                if (IsValid(ply) and ply:IsPlayer() and ply:Alive() and ply ~= owner and string.match(ply:GetModel(), "titan") ~= "titan") then
+                    ply:TakeDamage(9999, owner, self)
+                end
+            end
+        end
+    end
+end
+
 
 function SWEP:PrimaryAttack()
     if IsFirstTimePredicted() and self:CanPrimaryAttack() then
@@ -211,7 +232,7 @@ function SWEP:PrimaryAttack()
 
                     for _, ply in pairs(ents.FindInSphere(handPos, 80)) do
                         if IsValid(ply) and ply:IsPlayer() and not table.HasValue(damagedPlayers, ply) and ply ~= self:GetOwner() and ply:Alive() then
-                            ply:TakeDamage(100, self:GetOwner(), self)
+                            ply:TakeDamage(1000, self:GetOwner(), self)
                             table.insert(damagedPlayers, ply)
                         elseif not buildDestroyed then
                             local tr = util.TraceLine({

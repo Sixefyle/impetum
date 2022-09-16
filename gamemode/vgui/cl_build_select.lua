@@ -71,7 +71,7 @@ function ply:ShowBuildSelector()
 
         build_type_pane.DoClick = function()
             weap.lastSelection = model
-            GST_SNK.Utils:CreateGhost(model, weap, 1500)
+            GST_SNK.Utils:CreateGhost(model, weap, weap.BuildRange)
             self.build_base_panel:Remove()
         end
 

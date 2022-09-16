@@ -20,8 +20,11 @@ SWEP.Slot = 1
 SWEP.SlotPos = 2
 SWEP.DrawAmmo = false
 SWEP.DrawCrosshair = true
-SWEP.ViewModel = "models/weapons/gst/v_lame_base.mdl"
-SWEP.WorldModel = "models/gst/3dmg/r_lame.mdl"
+
+SWEP.ViewModel = "models/weapons/gst/v_lame_first.mdl"
+SWEP.WorldModel = "models/gst/3dmg/w_lame_first.mdl"
+SWEP.Skin = 0
+
 SWEP.ViewModelFOV = 60
 
 SWEP.MaxSpeed = 2000
@@ -32,19 +35,18 @@ SWEP.BaseMaxGas = 1000
 SWEP.MaxRopeRange = 6000
 SWEP.BaseRange = 1200
 SWEP.DetectBox = {
-    mins = Vector(0,-1800,-400),
-    maxs = Vector(2400,1800,400) -- Face Left Height
+    mins = Vector(3400,-800,-900), --Vector(0,-1800,-400),
+    maxs = Vector(600,800,900)   --Vector(2400,1800,400) -- Face Left Height
 }
 
-SWEP.GrabComsuption = 0--2
-SWEP.GasComsuption = 0--4
+SWEP.GrabComsuption = 2--2
+SWEP.GasComsuption = 4--4
 
 SWEP.RegenMaxPerc = 20
 SWEP.RegenSpeedPerc = 1
 SWEP.RegenDelay = 4 -- time before start regen
 SWEP.RegenTickDelay = 2
 SWEP.HoldType 			= "gizer_idle"
-
 
 function SWEP:CanUseGas()
     return IsValid(self:GetNWEntity("rope1")) or IsValid(self:GetNWEntity("rope2"))

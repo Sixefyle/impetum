@@ -1,8 +1,10 @@
 SWEP.PrintName = "Cannon"
 SWEP.AdminSpawnable = true
 SWEP.Spawnable = true
-SWEP.ViewModel = "models/titan/v_hand_v2.mdl"
+SWEP.ViewModel = "models/weapons/c_arms_dod.mdl"
 SWEP.WorldModel = "models/weapons/w_pistol.mdl"
+SWEP.ShowViewModel = true
+SWEP.ShowWorldModel = false
 SWEP.Base = "base_skill"
 SWEP.ViewModelFlip = false
 SWEP.ViewModelFOV = 75
@@ -21,7 +23,7 @@ SWEP.Primary.Ammo = ""
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = ""
 
-SWEP.BaseCooldown = 10
+SWEP.BaseCooldown = 120
 SWEP.IsPlaced = false
 SWEP.Icon = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ARTILLERY
 SWEP.IconBack = GST_SNK.Images.SKILL_HUMAN_ELDIEN_ARTILLERY_BACK
@@ -34,17 +36,8 @@ function SWEP:CanSecondaryAttack()
 end
 
 if CLIENT then
-    function GetClientWorldHeightPos(pos)
-        local trace = util.TraceLine( {
-            start = pos,
-            endpos = pos + Angle(90,0,0):Forward() * 10000
-        } )
-        
-        return trace.HitPos
-    end
-
     function SWEP:Deploy()
-        GST_SNK.Utils:CreateGhost("models/canon1.mdl", self, 1500)
+        GST_SNK.Utils:CreateGhost("models/models/gst/canon.mdl", self, 300)
     end
 
     function SWEP:PrimaryAttack()
@@ -64,13 +57,15 @@ if SERVER then
     util.AddNetworkString("PlaceCanon")
 
     net.Receive("PlaceCanon", function(len, ply)
+        if (not ply.canUseSkill) then return end
+
         local pos = net.ReadVector()
         local angle = net.ReadAngle()
         if (type(pos) == "Vector" and type(angle) == "Angle") then
             if (IsValid(ply.PlacedCanon)) then
                 ply.PlacedCanon:Remove()
             end
-            local canon = ents.Create("ent_canon1")
+            local canon = ents.Create("ent_canon")
             canon:SetCreator(ply)
             canon:SetAngles(angle)
             canon:Spawn()

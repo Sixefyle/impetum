@@ -73,8 +73,6 @@ function SWEP:Deploy()
                 owner:ManipulateBoneAngles(owner:LookupBone("mixamorig:Spine"), Angle(0, 0, math.Clamp(angle[1], -80, 60)))
             end
         end)
-
-        owner:SetJumpPower(0)
     end
 
     self:AfterDeploy()

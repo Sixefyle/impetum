@@ -1,6 +1,6 @@
-util.AddNetworkString("ForceHudRefresh")
-util.AddNetworkString("ShowRepairBar")
-util.AddNetworkString("SendPlayerShortcut")
+util.AddNetworkString("AOTA:TC:ForceHudRefresh")
+util.AddNetworkString("AOTA:TC:ShowRepairBar")
+util.AddNetworkString("AOTA:TS:SendPlayerShortcut")
 
 local ply = FindMetaTable("Player") --Defines the local player
 
@@ -59,7 +59,7 @@ end
 
 local function StopRepair(ply)
     timer.Remove("BuildRepair" .. ply:EntIndex())
-    net.Start("ShowRepairBar")
+    net.Start("AOTA:TC:ShowRepairBar")
         net.WriteBool(false)
     net.Send(ply)
     ply:StopSound("gst/hammer_sound.wav")
@@ -88,6 +88,12 @@ local function tempRepairBuildFunc(name)
     end
 end
 
+hook.Add("PlayerPostThink", "HandlePlayerDuck", function(ply)
+    if (table.HasValue({GST_SNK.Teams.Titan, GST_SNK.Teams.Primordial}, ply:GetTeam()) and ply:IsFlagSet(FL_DUCKING)) then
+        ply:RemoveFlags(FL_DUCKING)
+    end
+end)
+
 hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
     if (ply:IsAdmin() and key == KEY_END) then
         for _, buildName in pairs(GST_SNK.Maps[game.GetMap()].DestructibleBuild) do
@@ -113,7 +119,7 @@ hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
         table.sort(buildPoints, function(a, b) return a:GetName() > b:GetName() end)
 
         if (state3 == nil) then
-            net.Start("ShowRepairBar")
+            net.Start("AOTA:TC:ShowRepairBar")
                 net.WriteBool(true)
             net.Send(ply)
 
@@ -136,15 +142,18 @@ hook.Add("PlayerButtonDown", "ConstructionRebuild", function(ply, key)
                 if (ply:GetNWFloat("RepairProgression") == 1000) then
                     if (state3 == nil and state2 ~= nil and state1 ~= nil) then
                         buildPoints[3]:Input("ForceSpawn")
+                        ply:AddPoints(GAMEMODE.Rewards.RepairBuild)
                     end
                     StopRepair(ply)
                 elseif (ply:GetNWFloat("RepairProgression") == 666) then
                     if (state2 == nil and state1 ~= nil) then
                         buildPoints[2]:Input("ForceSpawn")
+                        ply:AddPoints(GAMEMODE.Rewards.RepairBuild)
                     end
                 elseif (ply:GetNWFloat("RepairProgression") == 333) then
                     if (state1 == nil) then
                         buildPoints[1]:Input("ForceSpawn")
+                        ply:AddPoints(GAMEMODE.Rewards.RepairBuild)
                     end
                 end
             end)
@@ -154,21 +163,20 @@ end)
 
 --Team Selection 
 -- Called when player picks a team, or when the game gives it one.
-net.Receive("TeamSelect", function(length, ply)
+net.Receive("AOTA:TS:TeamSelect", function(length, ply)
     local newTeam = net.ReadString()
     local newClass = net.ReadString()
 
     if (GST_SNK.Teams[newTeam] and GST_SNK.Classes[newTeam][newClass] ) then
-        GST_SNK:RequestTeamSwitch(ply, GST_SNK.Teams[newTeam], GST_SNK.Classes[newTeam][newClass])
+        GST_SNK:RequestTeamSwitch(ply, GST_SNK.Teams[newTeam], GST_SNK.Classes[newTeam][newClass], newClass)
         --ply:GiveGamemodeWeapons()
     else
         ply:ChatPrint("Une erreur s'est produite, veuillez recommencer...")
     end
 end)
 
-net.Receive("SendPlayerShortcut", function(len, ply)
+net.Receive("AOTA:TS:SendPlayerShortcut", function(len, ply)
     if (IsValid(ply)) then
-        print("test sendplayershortcut")
         ply.preference = {}
         ply.preference.server_only_sc = net.ReadTable()
     end

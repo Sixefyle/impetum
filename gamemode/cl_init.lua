@@ -1,13 +1,13 @@
+include("shared/sh_resources.lua")
 include("shared.lua")
-include("sh_resources.lua")
-include("cl_preference.lua")
-include("sh_teams.lua")
-include("sh_class.lua")
-include("cl_net.lua")
-include("utils.lua")
-
+include("shared/sh_utils.lua")
+include("shared/sh_teams.lua")
+include("shared/sh_class.lua")
+include("client/cl_preference.lua")
+include("client/cl_utils.lua")
+include("client/cl_marker.lua")
+include("net/cl_net.lua")
 include("vgui/cl_hud.lua")
-include("cl_menu.lua")
 include("vgui/cl_scoreboard.lua")
 include("vgui/cl_class_selection.lua")
 include("vgui/cl_team_selection.lua")
@@ -60,3 +60,13 @@ hook.Add("PlayerButtonDown", "showCursor", function(ply, button)
         gui.EnableScreenClicker(gui.MouseX() == 0)
     end
 end)
+
+local hide = {
+	["CHudHealth"] = true,
+	["CHudBattery"] = true
+}
+hook.Add( "HUDShouldDraw", "HideHUD", function( name )
+	if ( hide[ name ] ) then
+		return false
+	end
+end )
